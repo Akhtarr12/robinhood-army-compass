@@ -4,28 +4,69 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Heart, Mail, Lock } from 'lucide-react';
+import { Heart, Mail, Lock, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthSectionProps {
   onLogin: () => void;
 }
 
 const AuthSection: React.FC<AuthSectionProps> = ({ onLogin }) => {
+  const { signUp, signIn } = useAuth();
+  const { toast } = useToast();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate authentication delay
-    setTimeout(() => {
+    try {
+      if (isSignUp) {
+        const { error } = await signUp(email, password, fullName);
+        if (error) {
+          toast({
+            title: "Sign Up Error",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Success!",
+            description: "Please check your email to verify your account.",
+          });
+          onLogin();
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast({
+            title: "Sign In Error", 
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "You have been successfully signed in.",
+          });
+          onLogin();
+        }
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive"
+      });
+    } finally {
       setLoading(false);
-      onLogin();
-    }, 1000);
+    }
   };
 
   return (
@@ -56,16 +97,19 @@ const AuthSection: React.FC<AuthSectionProps> = ({ onLogin }) => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="h-11"
-                  />
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="pl-10 h-11"
+                    />
+                  </div>
                 </div>
               )}
               

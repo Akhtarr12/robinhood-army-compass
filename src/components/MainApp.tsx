@@ -1,31 +1,29 @@
 
 import React, { useState } from 'react';
-import { Heart, Users, BookOpen, User } from 'lucide-react';
+import { Heart, Users, BookOpen, User, LogOut } from 'lucide-react';
 import ChildrenSection from './ChildrenSection';
 import RobinsSection from './RobinsSection';
 import EducationSection from './EducationSection';
 import AuthSection from './AuthSection';
+import { useAuth } from '@/hooks/useAuth';
+import { AuthProvider } from '@/hooks/useAuth';
 
-type ActiveSection = 'auth' | 'children' | 'robins' | 'education';
+type ActiveSection = 'children' | 'robins' | 'education';
 
-const MainApp = () => {
-  const [activeSection, setActiveSection] = useState<ActiveSection>('auth');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const MainAppContent = () => {
+  const { user, signOut, loading } = useAuth();
+  const [activeSection, setActiveSection] = useState<ActiveSection>('children');
 
   const handleLogin = () => {
-    setIsAuthenticated(true);
     setActiveSection('children');
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setActiveSection('auth');
+  const handleLogout = async () => {
+    await signOut();
   };
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'auth':
-        return <AuthSection onLogin={handleLogin} />;
       case 'children':
         return <ChildrenSection />;
       case 'robins':
@@ -37,8 +35,21 @@ const MainApp = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return renderContent();
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Heart className="h-8 w-8 text-white" />
+          </div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthSection onLogin={handleLogin} />;
   }
 
   return (
@@ -58,9 +69,10 @@ const MainApp = () => {
             </div>
             <button
               onClick={handleLogout}
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
-              Logout
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
             </button>
           </div>
         </div>
@@ -97,6 +109,14 @@ const MainApp = () => {
         {renderContent()}
       </main>
     </div>
+  );
+};
+
+const MainApp = () => {
+  return (
+    <AuthProvider>
+      <MainAppContent />
+    </AuthProvider>
   );
 };
 

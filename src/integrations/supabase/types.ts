@@ -9,7 +9,141 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      children: {
+        Row: {
+          aadhaar_number: string
+          age_group: number
+          created_at: string
+          father_name: string
+          id: string
+          mother_name: string
+          name: string
+          photo_url: string | null
+          school_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aadhaar_number: string
+          age_group: number
+          created_at?: string
+          father_name: string
+          id?: string
+          mother_name: string
+          name: string
+          photo_url?: string | null
+          school_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aadhaar_number?: string
+          age_group?: number
+          created_at?: string
+          father_name?: string
+          id?: string
+          mother_name?: string
+          name?: string
+          photo_url?: string | null
+          school_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      educational_content: {
+        Row: {
+          age_group: number
+          content: string
+          content_type: string
+          created_at: string
+          id: string
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          age_group: number
+          content: string
+          content_type: string
+          created_at?: string
+          id?: string
+          subject: string
+          user_id: string
+        }
+        Update: {
+          age_group?: number
+          content?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      robins: {
+        Row: {
+          assigned_date: string
+          assigned_location: string
+          created_at: string
+          id: string
+          name: string
+          photo_url: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_date: string
+          assigned_location: string
+          created_at?: string
+          id?: string
+          name: string
+          photo_url?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_date?: string
+          assigned_location?: string
+          created_at?: string
+          id?: string
+          name?: string
+          photo_url?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
