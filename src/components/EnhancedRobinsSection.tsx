@@ -46,6 +46,8 @@ const EnhancedRobinsSection = () => {
     robinUnavailability,
     addRobin,
     addRobinDrive,
+    updateRobinLocation,
+    addRobinUnavailability,
     uploadPhoto,
     loading
   } = useSupabaseData();
@@ -151,9 +153,11 @@ const EnhancedRobinsSection = () => {
       return;
     }
 
-    // For now, we'll use the basic addRobinDrive function
-    // In a more complete implementation, this would be extended to include the new fields
-    const { error } = await addRobinDrive(robinId, driveFormData.location);
+    const { error } = await addRobinDrive(robinId, driveFormData.location, {
+      commute_method: driveFormData.commute_method,
+      contribution_message: driveFormData.contribution_message,
+      items_brought: driveFormData.items_brought
+    });
     
     if (error) {
       toast({
@@ -599,14 +603,22 @@ const EnhancedRobinsSection = () => {
                   <div className="flex gap-2">
                     <Button 
                       size="sm" 
-                      onClick={() => {
-                        // In a real implementation, this would update the location
-                        toast({
-                          title: "Location Updated",
-                          description: `${robin.name}'s location updated to ${newLocation}`,
-                        });
-                        setShowLocationEdit(null);
-                        setNewLocation('');
+                      onClick={async () => {
+                        const { error } = await updateRobinLocation(robin.id, newLocation);
+                        if (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to update location.",
+                            variant: "destructive"
+                          });
+                        } else {
+                          toast({
+                            title: "Location Updated",
+                            description: `${robin.name}'s location updated to ${newLocation}`,
+                          });
+                          setShowLocationEdit(null);
+                          setNewLocation('');
+                        }
                       }}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
@@ -646,14 +658,22 @@ const EnhancedRobinsSection = () => {
                   <div className="flex gap-2">
                     <Button 
                       size="sm" 
-                      onClick={() => {
-                        // In a real implementation, this would save the unavailability
-                        toast({
-                          title: "Unavailability Recorded",
-                          description: "Unavailability has been recorded.",
-                        });
-                        setShowUnavailabilityForm(null);
-                        setUnavailabilityData({ date: '', reason: '' });
+                      onClick={async () => {
+                        const { error } = await addRobinUnavailability(robin.id, unavailabilityData.date, unavailabilityData.reason);
+                        if (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to record unavailability.",
+                            variant: "destructive"
+                          });
+                        } else {
+                          toast({
+                            title: "Unavailability Recorded",
+                            description: "Unavailability has been recorded.",
+                          });
+                          setShowUnavailabilityForm(null);
+                          setUnavailabilityData({ date: '', reason: '' });
+                        }
                       }}
                       className="bg-orange-600 hover:bg-orange-700"
                     >

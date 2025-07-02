@@ -81,7 +81,7 @@ export interface Drive {
   robin_group_photo_url: string | null;
   children_group_photo_url: string | null;
   combined_group_photo_url: string | null;
-  items_distributed: any[] | null;
+  items_distributed: any;
   created_at: string;
   updated_at: string;
 }
@@ -247,13 +247,26 @@ export const useSupabaseData = () => {
     return { data };
   };
 
-  // Add robin drive
-  const addRobinDrive = async (robinId: string, location: string) => {
+  // Add robin drive with enhanced data
+  const addRobinDrive = async (robinId: string, location: string, driveData?: {
+    commute_method?: string;
+    contribution_message?: string;
+    items_brought?: any[];
+    drive_id?: string;
+  }) => {
     if (!user) return { error: 'Not authenticated' };
 
     const { data, error } = await supabase
       .from('robin_drives')
-      .insert([{ robin_id: robinId, location, user_id: user.id }])
+      .insert([{ 
+        robin_id: robinId, 
+        location, 
+        user_id: user.id,
+        commute_method: driveData?.commute_method || null,
+        contribution_message: driveData?.contribution_message || null,
+        items_brought: driveData?.items_brought || [],
+        drive_id: driveData?.drive_id || null
+      }])
       .select()
       .single();
 
@@ -302,6 +315,120 @@ export const useSupabaseData = () => {
       console.error('Error fetching robin drives:', error);
     } else {
       setRobinDrives(data || []);
+    }
+  };
+
+  // Add drive management functions
+  const addDrive = async (driveData: Omit<Drive, 'id' | 'created_at' | 'updated_at'>) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase
+      .from('drives')
+      .insert([{ ...driveData, user_id: user.id }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding drive:', error);
+      return { error };
+    }
+
+    setDrives(prev => [data, ...prev]);
+    return { data };
+  };
+
+  const updateDrive = async (driveId: string, updates: Partial<Drive>) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase
+      .from('drives')
+      .update(updates)
+      .eq('id', driveId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating drive:', error);
+      return { error };
+    }
+
+    setDrives(prev => prev.map(d => d.id === driveId ? { ...d, ...data } : d));
+    return { data };
+  };
+
+  const fetchDrives = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('drives')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching drives:', error);
+    } else {
+      setDrives(data || []);
+    }
+  };
+
+  // Update robin location
+  const updateRobinLocation = async (robinId: string, newLocation: string) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase
+      .from('robins')
+      .update({ assigned_location: newLocation })
+      .eq('id', robinId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating robin location:', error);
+      return { error };
+    }
+
+    setRobins(prev => prev.map(r => r.id === robinId ? { ...r, ...data } : r));
+    return { data };
+  };
+
+  // Add robin unavailability
+  const addRobinUnavailability = async (robinId: string, date: string, reason?: string) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase
+      .from('robin_unavailability')
+      .insert([{ 
+        robin_id: robinId, 
+        unavailable_date: date, 
+        reason: reason || null,
+        user_id: user.id 
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding robin unavailability:', error);
+      return { error };
+    }
+
+    setRobinUnavailability(prev => [data, ...prev]);
+    return { data };
+  };
+
+  const fetchRobinUnavailability = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('robin_unavailability')
+      .select('*')
+      .order('unavailable_date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching robin unavailability:', error);
+    } else {
+      setRobinUnavailability(data || []);
     }
   };
 
@@ -378,6 +505,8 @@ export const useSupabaseData = () => {
       fetchEducationalContent();
       fetchChildAttendance();
       fetchRobinDrives();
+      fetchDrives();
+      fetchRobinUnavailability();
     }
   }, [user]);
 
@@ -395,10 +524,16 @@ export const useSupabaseData = () => {
     uploadPhoto,
     addChildAttendance,
     addRobinDrive,
+    addDrive,
+    updateDrive,
+    updateRobinLocation,
+    addRobinUnavailability,
     fetchChildren,
     fetchRobins,
     fetchEducationalContent,
     fetchChildAttendance,
-    fetchRobinDrives
+    fetchRobinDrives,
+    fetchDrives,
+    fetchRobinUnavailability
   };
 };

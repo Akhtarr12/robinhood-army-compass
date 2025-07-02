@@ -1,14 +1,15 @@
 
 import React, { useState } from 'react';
-import { Heart, Users, BookOpen, User, LogOut } from 'lucide-react';
+import { Heart, Users, BookOpen, User, LogOut, Car } from 'lucide-react';
 import EnhancedChildrenSection from './EnhancedChildrenSection';
 import EnhancedRobinsSection from './EnhancedRobinsSection';
 import EducationSection from './EducationSection';
+import DriveManagementSection from './DriveManagementSection';
 import AuthSection from './AuthSection';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthProvider } from '@/hooks/useAuth';
 
-type ActiveSection = 'children' | 'robins' | 'education';
+type ActiveSection = 'children' | 'robins' | 'education' | 'drives';
 
 const MainAppContent = () => {
   const { user, signOut, loading } = useAuth();
@@ -30,6 +31,8 @@ const MainAppContent = () => {
         return <EnhancedRobinsSection />;
       case 'education':
         return <EducationSection />;
+      case 'drives':
+        return <DriveManagementSection />;
       default:
         return <EnhancedChildrenSection />;
     }
@@ -85,6 +88,7 @@ const MainAppContent = () => {
             {[
               { id: 'children', label: 'Children', icon: Users },
               { id: 'robins', label: 'Robins', icon: User },
+              { id: 'drives', label: 'Drives', icon: Car },
               { id: 'education', label: 'Education', icon: BookOpen },
             ].map(({ id, label, icon: Icon }) => (
               <button
