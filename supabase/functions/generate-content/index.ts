@@ -130,9 +130,9 @@ serve(async (req) => {
 
     // First, let's try to check if the user exists or if there are RLS issues
     // Test connection to Supabase
-    const { data: testData, error: testError } = await supabase
+    const { error: testError } = await supabase
       .from('educational_content')
-      .select('count(*)')
+      .select('*')
       .limit(1);
 
     if (testError) {
