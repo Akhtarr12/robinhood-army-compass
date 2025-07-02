@@ -40,26 +40,26 @@ serve(async (req) => {
       throw new Error('Subject must be a non-empty string');
     }
 
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openaiApiKey) {
-      throw new Error('OPENAI_API_KEY not configured');
+    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
+    if (!perplexityApiKey) {
+      throw new Error('PERPLEXITY_API_KEY not configured');
     }
 
     // Create prompt based on content type
     const prompt = createPrompt(parsedAgeGroup, subject.trim(), normalizedContentType);
     console.log('Generated prompt:', prompt);
 
-    // Call OpenAI API (gpt-3.5-turbo)
+    // Call Perplexity API (chat/completions)
     let response;
     try {
-      response = await fetch('https://api.openai.com/v1/chat/completions', {
+      response = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiApiKey}`
+          'Authorization': `Bearer ${perplexityApiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'llama-3-sonar-large-32k-online',
           messages: [
             { role: 'system', content: 'You are a helpful educational content generator for children.' },
             { role: 'user', content: prompt }
@@ -70,19 +70,19 @@ serve(async (req) => {
         })
       });
     } catch (error) {
-      throw new Error('Failed to call OpenAI API: ' + error.message);
+      throw new Error('Failed to call Perplexity API: ' + error.message);
     }
 
     if (!response || !response.ok) {
       const errorText = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      throw new Error(`Perplexity API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('OpenAI response:', data);
+    console.log('Perplexity response:', data);
 
     if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-      throw new Error('Invalid response from OpenAI API');
+      throw new Error('Invalid response from Perplexity API');
     }
 
     const generatedContent = data.choices[0].message.content;
