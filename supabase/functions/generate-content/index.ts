@@ -59,7 +59,117 @@ serve(async (req) => {
     const prompt = createPrompt(parsedAgeGroup, subject.trim(), normalizedContentType);
     console.log('Generated prompt:', prompt);
 
-    // Call Perplexity API (chat/completions)
+    // --- Prompt Engineering Functions ---
+    function getSystemPrompt() {
+      return `
+You are an expert AI educator that creates highly engaging, accurate, and age-appropriate educational content for children aged 3 to 20.
+
+🎯 Instructions for generating content:
+
+1. **ageGroup**:
+   - Tailor sentence length, vocabulary, and examples to this age.
+   - Children under 10 benefit from shorter sentences, emojis 🎉, and storytelling.
+   - Teens may appreciate real-world examples, structured explanations, and interactive tone.
+
+2. **subject**:
+   - Deliver knowledge in a fun yet educational manner (e.g., Math, Science, Hindi, etc.).
+
+3. **contentType** _(default: "simple explanation")_:
+   - "story": Narrative with fun characters and subtle lessons.
+   - "practice questions": List of 5 relevant questions with answers.
+   - "simple explanation": Concept breakdown with relatable examples.
+   - "fun activities": 3–5 interactive ideas using simple materials.
+   - "learning games": Creative game concepts to reinforce learning.
+
+4. **tone** _(default: "formal")_:
+   - Match tone to age and contentType. Options include: "fun", "playful", "academic", "story-based", etc.
+
+5. **language** _(default: "English")_:
+   - All output should be written in the specified language.
+
+6. **includeQuiz** _(default: false)_:
+   - If true, include 2–3 short quiz questions **with answers** at the end.
+
+7. **customInstructions** _(optional)_:
+   - Additional user-specified notes to follow (e.g., “Use animal characters”, “Include a moral”, “Make it rhyme”).
+
+🧠 Your content must be:
+- Age-appropriate and well-paced
+- Educational, fun, and clear
+- Never exceed 300 words unless explicitly requested
+- Always follow the format shown in examples below
+`;
+    }
+
+    function getUserPrompt(payload: any) {
+      const {
+        ageGroup,
+        subject,
+        contentType = "simple explanation",
+        tone = "formal",
+        language = "English",
+        includeQuiz = false,
+        customInstructions = ""
+      } = payload;
+
+      let prompt = `Generate a ${contentType} for a ${ageGroup}-year-old child about "${subject}" in ${language} using a ${tone} tone.`;
+      if (includeQuiz) {
+        prompt += ` Include a short 2–3 question quiz with answers.`;
+      }
+      if (customInstructions) {
+        prompt += ` Additional instructions: ${customInstructions}`;
+      }
+      return prompt;
+    }
+
+    function getFewShotExamples() {
+      return [
+        {
+          role: "user",
+          content: `Generate a story for a 5-year-old child about "Water Cycle" in English using a fun tone. Include a quiz.`
+        },
+        {
+          role: "assistant",
+          content: `💧 **Wally the Water Drop's Big Adventure** 🌧️\n\nWally the Water Drop lived in a fluffy cloud. One day, he fell down as rain 🌧️ and landed in a river. "Wheee!" he shouted. Then, the sun ☀️ came out and warmed him up. Wally turned into steam and floated back into the sky!\n\nThat's how the water cycle works — rain, river, sun, and back to the clouds! 🌈\n\n---\n\n📝 **Quiz Time!**\n1. What is the name of the water drop? ➤ Wally  \n2. Where did Wally fall from? ➤ A cloud ☁️  \n3. What turned Wally into steam? ➤ The Sun ☀️`
+        },
+        {
+          role: "user",
+          content: `Generate practice questions for a 10-year-old about "Fractions" in English using an academic tone. Include a quiz.`
+        },
+        {
+          role: "assistant",
+          content: `📚 **Practice Questions on Fractions**\n\n1. What is 1/2 of 8? ➤ 4  \n2. Simplify the fraction 4/8 ➤ 1/2  \n3. What is the denominator in 3/5? ➤ 5  \n4. Which is larger: 2/3 or 3/4? ➤ 3/4  \n5. Write 0.75 as a fraction ➤ 3/4\n\n---\n\n📝 **Quick Quiz**\n1. What’s the simplified form of 6/9? ➤ 2/3  \n2. Which fraction means “half”? ➤ 1/2`
+        },
+        {
+          role: "user",
+          content: `Generate fun activities for a 14-year-old about "Photosynthesis" in English using a playful tone.`
+        },
+        {
+          role: "assistant",
+          content: `🌿 **Photosynthesis Activities for Teens**\n\n1. **Leaf Diary** 📓  \n   Collect leaves from different plants and track their exposure to sunlight. Record their condition daily.\n\n2. **Chlorophyll Art** 🎨  \n   Mash spinach leaves and use the green pigment to make creative posters explaining the process.\n\n3. **DIY Oxygen Experiment** 🧪  \n   Place a water plant in a clear bowl under sunlight. Watch bubbles form — that’s oxygen!\n\n4. **Rap Battle: Plant Style** 🎤  \n   Write a short rap explaining photosynthesis and perform it in a fun session!\n\n5. **Time-lapse Lab** ⏱️  \n   Take daily pictures of a growing plant and build a time-lapse video to present in class.`
+        }
+      ];
+    }
+
+    // Build Perplexity messages array
+    const payload = {
+      ageGroup: parsedAgeGroup,
+      subject: subject.trim(),
+      contentType: normalizedContentType,
+      tone: 'formal', // You can extend this to accept from user input
+      language: 'English', // You can extend this to accept from user input
+      includeQuiz: false, // You can extend this to accept from user input
+      customInstructions: '' // You can extend this to accept from user input
+    };
+    const systemPrompt = getSystemPrompt();
+    const userPrompt = getUserPrompt(payload);
+    const fewShots = getFewShotExamples();
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...fewShots,
+      { role: 'user', content: userPrompt }
+    ];
+
     let response;
     try {
       response = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -70,10 +180,7 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           model: 'sonar-pro',
-          messages: [
-            { role: 'system', content: 'You are a helpful educational content generator for children.' },
-            { role: 'user', content: prompt }
-          ],
+          messages,
           temperature: 0.7,
           max_tokens: 1000,
           top_p: 0.8
