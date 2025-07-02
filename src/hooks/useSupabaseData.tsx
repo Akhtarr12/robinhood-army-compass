@@ -10,9 +10,11 @@ export interface Child {
   photo_url: string | null;
   mother_name: string;
   father_name: string;
-  aadhaar_number: string;
+  aadhaar_number: string | null;
   school_name: string | null;
   age_group: number;
+  location: string | null;
+  attendance_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -23,6 +25,8 @@ export interface Robin {
   photo_url: string | null;
   assigned_location: string;
   assigned_date: string;
+  home_location: string | null;
+  drive_count: number;
   status: string | null;
   created_at: string;
   updated_at: string;
@@ -37,12 +41,31 @@ export interface EducationalContent {
   created_at: string;
 }
 
+export interface ChildAttendance {
+  id: string;
+  child_id: string;
+  date: string;
+  location: string;
+  created_at: string;
+}
+
+export interface RobinDrive {
+  id: string;
+  robin_id: string;
+  date: string;
+  location: string;
+  attendance_marked: boolean;
+  created_at: string;
+}
+
 export const useSupabaseData = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [children, setChildren] = useState<Child[]>([]);
   const [robins, setRobins] = useState<Robin[]>([]);
   const [educationalContent, setEducationalContent] = useState<EducationalContent[]>([]);
+  const [childAttendance, setChildAttendance] = useState<ChildAttendance[]>([]);
+  const [robinDrives, setRobinDrives] = useState<RobinDrive[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Fetch children data
@@ -165,7 +188,91 @@ export const useSupabaseData = () => {
       .from('photos')
       .getPublicUrl(fileName);
 
-    return { data: data.publicUrl };
+  return { data: data.publicUrl };
+  };
+
+  // Add child attendance
+  const addChildAttendance = async (childId: string, location: string) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase
+      .from('child_attendance')
+      .insert([{ child_id: childId, location, user_id: user.id }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding child attendance:', error);
+      return { error };
+    }
+
+    // Update child's attendance count
+    await supabase
+      .from('children')
+      .update({ attendance_count: children.find(c => c.id === childId)?.attendance_count + 1 || 1 })
+      .eq('id', childId);
+
+    setChildAttendance(prev => [data, ...prev]);
+    fetchChildren(); // Refresh to get updated count
+    return { data };
+  };
+
+  // Add robin drive
+  const addRobinDrive = async (robinId: string, location: string) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase
+      .from('robin_drives')
+      .insert([{ robin_id: robinId, location, user_id: user.id }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding robin drive:', error);
+      return { error };
+    }
+
+    // Update robin's drive count
+    await supabase
+      .from('robins')
+      .update({ drive_count: robins.find(r => r.id === robinId)?.drive_count + 1 || 1 })
+      .eq('id', robinId);
+
+    setRobinDrives(prev => [data, ...prev]);
+    fetchRobins(); // Refresh to get updated count
+    return { data };
+  };
+
+  // Fetch child attendance
+  const fetchChildAttendance = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('child_attendance')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching child attendance:', error);
+    } else {
+      setChildAttendance(data || []);
+    }
+  };
+
+  // Fetch robin drives
+  const fetchRobinDrives = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('robin_drives')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching robin drives:', error);
+    } else {
+      setRobinDrives(data || []);
+    }
   };
 
   // Set up real-time subscriptions
@@ -239,6 +346,8 @@ export const useSupabaseData = () => {
       fetchChildren();
       fetchRobins();
       fetchEducationalContent();
+      fetchChildAttendance();
+      fetchRobinDrives();
     }
   }, [user]);
 
@@ -246,12 +355,18 @@ export const useSupabaseData = () => {
     children,
     robins,
     educationalContent,
+    childAttendance,
+    robinDrives,
     loading,
     addChild,
     addRobin,
     uploadPhoto,
+    addChildAttendance,
+    addRobinDrive,
     fetchChildren,
     fetchRobins,
-    fetchEducationalContent
+    fetchEducationalContent,
+    fetchChildAttendance,
+    fetchRobinDrives
   };
 };

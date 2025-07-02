@@ -9,13 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      child_attendance: {
+        Row: {
+          child_id: string
+          created_at: string
+          date: string
+          id: string
+          location: string
+          user_id: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          date?: string
+          id?: string
+          location: string
+          user_id: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          location?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_attendance_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
-          aadhaar_number: string
+          aadhaar_number: string | null
           age_group: number
+          attendance_count: number | null
           created_at: string
           father_name: string
           id: string
+          location: string | null
           mother_name: string
           name: string
           photo_url: string | null
@@ -24,11 +61,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          aadhaar_number: string
+          aadhaar_number?: string | null
           age_group: number
+          attendance_count?: number | null
           created_at?: string
           father_name: string
           id?: string
+          location?: string | null
           mother_name: string
           name: string
           photo_url?: string | null
@@ -37,11 +76,13 @@ export type Database = {
           user_id: string
         }
         Update: {
-          aadhaar_number?: string
+          aadhaar_number?: string | null
           age_group?: number
+          attendance_count?: number | null
           created_at?: string
           father_name?: string
           id?: string
+          location?: string | null
           mother_name?: string
           name?: string
           photo_url?: string | null
@@ -108,11 +149,51 @@ export type Database = {
         }
         Relationships: []
       }
+      robin_drives: {
+        Row: {
+          attendance_marked: boolean | null
+          created_at: string
+          date: string
+          id: string
+          location: string
+          robin_id: string
+          user_id: string
+        }
+        Insert: {
+          attendance_marked?: boolean | null
+          created_at?: string
+          date?: string
+          id?: string
+          location: string
+          robin_id: string
+          user_id: string
+        }
+        Update: {
+          attendance_marked?: boolean | null
+          created_at?: string
+          date?: string
+          id?: string
+          location?: string
+          robin_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "robin_drives_robin_id_fkey"
+            columns: ["robin_id"]
+            isOneToOne: false
+            referencedRelation: "robins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       robins: {
         Row: {
           assigned_date: string
           assigned_location: string
           created_at: string
+          drive_count: number | null
+          home_location: string | null
           id: string
           name: string
           photo_url: string | null
@@ -124,6 +205,8 @@ export type Database = {
           assigned_date: string
           assigned_location: string
           created_at?: string
+          drive_count?: number | null
+          home_location?: string | null
           id?: string
           name: string
           photo_url?: string | null
@@ -135,6 +218,8 @@ export type Database = {
           assigned_date?: string
           assigned_location?: string
           created_at?: string
+          drive_count?: number | null
+          home_location?: string | null
           id?: string
           name?: string
           photo_url?: string | null

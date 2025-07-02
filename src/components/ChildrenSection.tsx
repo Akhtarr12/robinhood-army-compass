@@ -1,120 +1,144 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, User, School, Hash, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, User, School, Hash, Calendar, MapPin, Trophy, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSupabaseData, Child } from '@/hooks/useSupabaseData';
 
-interface Child {
-  id: string;
-  name: string;
-  photo: string;
-  motherName: string;
-  fatherName: string;
-  aadhaarNumber: string;
-  schoolName?: string;
-  ageGroup: string;
-  createdAt: Date;
-}
+const locations = [
+  'Raghubir Nagar',
+  'Delhi Cantt',
+  'Janakpuri',
+  'Dwarka',
+  'Rohini',
+  'Lajpat Nagar',
+  'Connaught Place',
+  'Karol Bagh',
+  'Uttam Nagar'
+];
 
 const ChildrenSection = () => {
-  const [children, setChildren] = useState<Child[]>([]);
+  const { 
+    children, 
+    childAttendance, 
+    addChild, 
+    addChildAttendance, 
+    uploadPhoto,
+    loading 
+  } = useSupabaseData();
+  
   const [showForm, setShowForm] = useState(false);
   const [editingChild, setEditingChild] = useState<Child | null>(null);
+  const [showAttendance, setShowAttendance] = useState<string | null>(null);
+  const [attendanceLocation, setAttendanceLocation] = useState('');
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     name: '',
-    photo: '',
-    motherName: '',
-    fatherName: '',
-    aadhaarNumber: '',
-    schoolName: '',
-    ageGroup: ''
+    photo_url: null as string | null,
+    mother_name: '',
+    father_name: '',
+    aadhaar_number: '',
+    school_name: '',
+    location: '',
+    age_group: 1
   });
 
   const resetForm = () => {
     setFormData({
       name: '',
-      photo: '',
-      motherName: '',
-      fatherName: '',
-      aadhaarNumber: '',
-      schoolName: '',
-      ageGroup: ''
+      photo_url: null,
+      mother_name: '',
+      father_name: '',
+      aadhaar_number: '',
+      school_name: '',
+      location: '',
+      age_group: 1
     });
     setEditingChild(null);
     setShowForm(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingChild) {
-      // Update existing child
-      setChildren(children.map(child => 
-        child.id === editingChild.id 
-          ? { ...child, ...formData }
-          : child
-      ));
+    const childData = {
+      ...formData,
+      attendance_count: 0
+    };
+
+    const { error } = await addChild(childData);
+    
+    if (error) {
       toast({
-        title: "Child Updated",
-        description: `${formData.name}'s information has been updated successfully.`,
+        title: "Error",
+        description: "Failed to register child. Please try again.",
+        variant: "destructive"
       });
     } else {
-      // Add new child
-      const newChild: Child = {
-        id: Date.now().toString(),
-        ...formData,
-        createdAt: new Date()
-      };
-      setChildren([...children, newChild]);
       toast({
         title: "Child Registered",
         description: `${formData.name} has been successfully registered.`,
       });
+      resetForm();
     }
+  };
+
+  const handleAttendance = async (childId: string) => {
+    if (!attendanceLocation) {
+      toast({
+        title: "Error",
+        description: "Please select a location for attendance.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { error } = await addChildAttendance(childId, attendanceLocation);
     
-    resetForm();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to mark attendance. Please try again.",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Attendance Marked",
+        description: "Child attendance has been recorded successfully.",
+      });
+      setShowAttendance(null);
+      setAttendanceLocation('');
+    }
   };
 
-  const handleEdit = (child: Child) => {
-    setFormData({
-      name: child.name,
-      photo: child.photo,
-      motherName: child.motherName,
-      fatherName: child.fatherName,
-      aadhaarNumber: child.aadhaarNumber,
-      schoolName: child.schoolName || '',
-      ageGroup: child.ageGroup
-    });
-    setEditingChild(child);
-    setShowForm(true);
-  };
-
-  const handleDelete = (childId: string) => {
-    const child = children.find(c => c.id === childId);
-    setChildren(children.filter(c => c.id !== childId));
-    toast({
-      title: "Child Removed",
-      description: `${child?.name} has been removed from the registry.`,
-      variant: "destructive"
-    });
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormData({ ...formData, photo: e.target?.result as string });
-      };
-      reader.readAsDataURL(file);
+      const { data, error } = await uploadPhoto(file, 'children');
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to upload photo. Please try again.",
+          variant: "destructive"
+        });
+      } else {
+        setFormData({ ...formData, photo_url: data });
+        toast({
+          title: "Photo Uploaded",
+          description: "Photo has been uploaded successfully.",
+        });
+      }
     }
   };
+
+  // Get leaderboard data (top 10 children by attendance)
+  const leaderboard = children
+    .sort((a, b) => (b.attendance_count || 0) - (a.attendance_count || 0))
+    .slice(0, 10);
 
   return (
     <div className="space-y-6">
@@ -132,6 +156,95 @@ const ChildrenSection = () => {
           Register Child
         </Button>
       </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Children</p>
+                <p className="text-2xl font-bold text-gray-900">{children.length}</p>
+              </div>
+              <User className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Attendance</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {children.reduce((sum, child) => sum + (child.attendance_count || 0), 0)}
+                </p>
+              </div>
+              <Clock className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Locations</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {new Set(children.filter(c => c.location).map(c => c.location)).size}
+                </p>
+              </div>
+              <MapPin className="h-8 w-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Leaderboard */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-yellow-600" />
+            Attendance Leaderboard
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {leaderboard.map((child, index) => (
+              <div key={child.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                    index === 0 ? 'bg-yellow-500' : 
+                    index === 1 ? 'bg-gray-400' : 
+                    index === 2 ? 'bg-amber-600' : 'bg-gray-300'
+                  }`}>
+                    {index + 1}
+                  </div>
+                  {child.photo_url ? (
+                    <img
+                      src={child.photo_url}
+                      alt={child.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center">
+                      <User className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium">{child.name}</p>
+                    <p className="text-sm text-gray-500">{child.location || 'No location set'}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-lg">{child.attendance_count || 0}</p>
+                  <p className="text-sm text-gray-500">days</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Registration Form */}
       {showForm && (
@@ -167,52 +280,67 @@ const ChildrenSection = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="motherName">Mother's Name *</Label>
+                <Label htmlFor="mother_name">Mother's Name *</Label>
                 <Input
-                  id="motherName"
-                  value={formData.motherName}
-                  onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
+                  id="mother_name"
+                  value={formData.mother_name}
+                  onChange={(e) => setFormData({ ...formData, mother_name: e.target.value })}
                   required
                   placeholder="Enter mother's name"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="fatherName">Father's Name *</Label>
+                <Label htmlFor="father_name">Father's Name *</Label>
                 <Input
-                  id="fatherName"
-                  value={formData.fatherName}
-                  onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
+                  id="father_name"
+                  value={formData.father_name}
+                  onChange={(e) => setFormData({ ...formData, father_name: e.target.value })}
                   required
                   placeholder="Enter father's name"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="aadhaarNumber">Aadhaar Number *</Label>
+                <Label htmlFor="aadhaar_number">Aadhaar Number (Optional)</Label>
                 <Input
-                  id="aadhaarNumber"
-                  value={formData.aadhaarNumber}
-                  onChange={(e) => setFormData({ ...formData, aadhaarNumber: e.target.value })}
-                  required
+                  id="aadhaar_number"
+                  value={formData.aadhaar_number}
+                  onChange={(e) => setFormData({ ...formData, aadhaar_number: e.target.value })}
                   placeholder="Enter 12-digit Aadhaar number"
                   maxLength={12}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="schoolName">School Name (Optional)</Label>
+                <Label htmlFor="school_name">School Name (Optional)</Label>
                 <Input
-                  id="schoolName"
-                  value={formData.schoolName}
-                  onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
+                  id="school_name"
+                  value={formData.school_name}
+                  onChange={(e) => setFormData({ ...formData, school_name: e.target.value })}
                   placeholder="Enter school name if applicable"
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="ageGroup">Age Group *</Label>
-                <Select value={formData.ageGroup} onValueChange={(value) => setFormData({ ...formData, ageGroup: value })}>
+              <div className="space-y-2">
+                <Label htmlFor="location">Usual Drive Location</Label>
+                <Select value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select usual location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((location) => (
+                      <SelectItem key={location} value={location}>
+                        {location}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="age_group">Age Group *</Label>
+                <Select value={formData.age_group.toString()} onValueChange={(value) => setFormData({ ...formData, age_group: parseInt(value) })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select age group" />
                   </SelectTrigger>
@@ -227,7 +355,7 @@ const ChildrenSection = () => {
               </div>
 
               <div className="md:col-span-2 flex gap-3 pt-4">
-                <Button type="submit" className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
+                <Button type="submit" disabled={loading} className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
                   {editingChild ? 'Update Child' : 'Register Child'}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
@@ -246,72 +374,109 @@ const ChildrenSection = () => {
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  {child.photo ? (
+                  {child.photo_url ? (
                     <img
-                      src={child.photo}
+                      src={child.photo_url}
                       alt={child.name}
-                      className="w-12 h-12 rounded-full object-cover"
+                      className="w-16 h-16 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center">
-                      <User className="h-6 w-6 text-white" />
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center">
+                      <User className="h-8 w-8 text-white" />
                     </div>
                   )}
                   <div>
                     <h3 className="font-semibold text-gray-900">{child.name}</h3>
-                    <p className="text-sm text-gray-500">{child.ageGroup} years old</p>
+                    <p className="text-sm text-gray-500">{child.age_group} years old</p>
+                    <p className="text-sm text-green-600 font-medium">
+                      {child.attendance_count || 0} days attended
+                    </p>
                   </div>
-                </div>
-                <div className="flex space-x-1">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleEdit(child)}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDelete(child.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
               
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-sm mb-4">
                 <div className="flex items-center text-gray-600">
                   <User className="h-4 w-4 mr-2" />
-                  Mother: {child.motherName}
+                  Mother: {child.mother_name}
                 </div>
                 <div className="flex items-center text-gray-600">
                   <User className="h-4 w-4 mr-2" />
-                  Father: {child.fatherName}
+                  Father: {child.father_name}
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <Hash className="h-4 w-4 mr-2" />
-                  Aadhaar: ****{child.aadhaarNumber.slice(-4)}
-                </div>
-                {child.schoolName && (
+                {child.aadhaar_number && (
+                  <div className="flex items-center text-gray-600">
+                    <Hash className="h-4 w-4 mr-2" />
+                    Aadhaar: ****{child.aadhaar_number.slice(-4)}
+                  </div>
+                )}
+                {child.school_name && (
                   <div className="flex items-center text-gray-600">
                     <School className="h-4 w-4 mr-2" />
-                    School: {child.schoolName}
+                    School: {child.school_name}
+                  </div>
+                )}
+                {child.location && (
+                  <div className="flex items-center text-gray-600">
+                    <MapPin className="h-4 w-4 mr-2 text-purple-600" />
+                    Location: {child.location}
                   </div>
                 )}
                 <div className="flex items-center text-gray-600">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Registered: {child.createdAt.toLocaleDateString()}
+                  Registered: {new Date(child.created_at).toLocaleDateString()}
                 </div>
               </div>
+
+              {/* Attendance Section */}
+              {showAttendance === child.id ? (
+                <div className="space-y-3 p-3 bg-green-50 rounded-lg">
+                  <Label>Mark Attendance</Label>
+                  <Select value={attendanceLocation} onValueChange={setAttendanceLocation}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations.map((location) => (
+                        <SelectItem key={location} value={location}>
+                          {location}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleAttendance(child.id)}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Mark Present
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => setShowAttendance(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button 
+                  size="sm" 
+                  onClick={() => setShowAttendance(child.id)}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  Mark Attendance
+                </Button>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {children.length === 0 && (
+      {children.length === 0 && !loading && (
         <Card className="text-center py-12">
           <CardContent>
             <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
