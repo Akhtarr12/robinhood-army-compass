@@ -6,6 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { BookOpen, Sparkles, Download, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 
 interface GeneratedContent {
   id: string;
@@ -36,16 +39,17 @@ const contentTypes = [
 ];
 
 const EducationSection = () => {
-  const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedContentType, setSelectedContentType] = useState('');
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { educationalContent, fetchEducationalContent } = useSupabaseData();
 
-  // Mock AI content generation
+  // AI content generation using Gemini API
   const generateContent = async () => {
-    if (!selectedAgeGroup || !selectedSubject || !selectedContentType) {
+    if (!selectedAgeGroup || !selectedSubject || !selectedContentType || !user) {
       toast({
         title: "Missing Information",
         description: "Please select age group, subject, and content type before generating.",
@@ -56,28 +60,41 @@ const EducationSection = () => {
 
     setIsGenerating(true);
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: {
+          ageGroup: selectedAgeGroup,
+          subject: selectedSubject,
+          contentType: selectedContentType,
+          userId: user.id
+        }
+      });
 
-    // Mock generated content based on selections
-    const mockContent = getMockContent(selectedAgeGroup, selectedSubject, selectedContentType);
-    
-    const newContent: GeneratedContent = {
-      id: Date.now().toString(),
-      ageGroup: selectedAgeGroup,
-      subject: selectedSubject,
-      contentType: selectedContentType,
-      content: mockContent,
-      generatedAt: new Date()
-    };
+      if (error) {
+        throw error;
+      }
 
-    setGeneratedContent([newContent, ...generatedContent]);
-    setIsGenerating(false);
-
-    toast({
-      title: "Content Generated",
-      description: `New ${selectedContentType.toLowerCase()} for ${selectedSubject} has been created!`,
-    });
+      if (data?.success) {
+        toast({
+          title: "Content Generated",
+          description: `New ${selectedContentType.toLowerCase()} for ${selectedSubject} has been created!`,
+        });
+        
+        // Refresh the educational content list
+        await fetchEducationalContent();
+      } else {
+        throw new Error(data?.error || 'Failed to generate content');
+      }
+    } catch (error) {
+      console.error('Error generating content:', error);
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate content. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const getMockContent = (age: string, subject: string, type: string): string => {
@@ -96,11 +113,11 @@ const EducationSection = () => {
     return templates[type as keyof typeof templates] || 'Generated educational content would appear here.';
   };
 
-  const downloadContent = (content: GeneratedContent) => {
+  const downloadContent = (content: any) => {
     const element = document.createElement('a');
     const file = new Blob([content.content], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = `${content.subject}_${content.contentType}_Age${content.ageGroup}.txt`;
+    element.download = `${content.subject}_${content.content_type}_Age${content.age_group}.txt`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -200,21 +217,21 @@ const EducationSection = () => {
 
       {/* Generated Content List */}
       <div className="space-y-4">
-        {generatedContent.map((content) => (
+        {educationalContent.map((content) => (
           <Card key={content.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <BookOpen className="h-5 w-5 text-blue-600" />
-                    {content.subject} - {content.contentType}
+                    {content.subject} - {content.content_type}
                   </CardTitle>
                   <div className="flex gap-2 mt-2">
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                      Age {content.ageGroup}
+                      Age {content.age_group}
                     </span>
                     <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                      {content.contentType}
+                      {content.content_type}
                     </span>
                     <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
                       {content.subject}
@@ -238,14 +255,14 @@ const EducationSection = () => {
                 className="min-h-[120px] bg-gray-50 text-gray-700"
               />
               <p className="text-xs text-gray-500 mt-2">
-                Generated: {content.generatedAt.toLocaleString()}
+                Generated: {new Date(content.created_at).toLocaleString()}
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {generatedContent.length === 0 && (
+      {educationalContent.length === 0 && (
         <Card className="text-center py-12">
           <CardContent>
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
