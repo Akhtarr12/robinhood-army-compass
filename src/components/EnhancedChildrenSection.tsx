@@ -220,13 +220,13 @@ const EnhancedChildrenSection = () => {
             </div>
             <div className="space-y-2">
               <Label>Filter by Location</Label>
-              <Select value={searchLocation} onValueChange={setSearchLocation}>
+              <Select value={searchLocation || "all"} onValueChange={(value) => setSearchLocation(value === "all" ? "" : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="All locations" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All locations</SelectItem>
-                  {locations.map((location) => (
+                  <SelectContent>
+                    <SelectItem value="all">All locations</SelectItem>
+                    {locations.map((location) => (
                     <SelectItem key={location} value={location}>
                       {location}
                     </SelectItem>
