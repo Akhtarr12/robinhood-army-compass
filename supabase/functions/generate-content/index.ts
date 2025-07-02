@@ -15,7 +15,8 @@ serve(async (req) => {
   }
 
   try {
-    const { ageGroup, subject, contentType, userId } = await req.json();
+    const body = await req.json();
+    const { ageGroup, subject, contentType, userId } = body;
     
     // Enhanced input validation
     if (!ageGroup || !subject || !contentType || !userId) {
