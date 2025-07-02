@@ -124,43 +124,74 @@ You are an expert AI educator that creates highly engaging, accurate, and age-ap
 
     function getFewShotExamples() {
       return [
+        // EXAMPLE 1 – English / Story / Age 5 / Fun / With Quiz
         {
           role: "user",
           content: `Generate a story for a 5-year-old child about "Water Cycle" in English using a fun tone. Include a quiz.`
         },
         {
           role: "assistant",
-          content: `💧 **Wally the Water Drop's Big Adventure** 🌧️\n\nWally the Water Drop lived in a fluffy cloud. One day, he fell down as rain 🌧️ and landed in a river. "Wheee!" he shouted. Then, the sun ☀️ came out and warmed him up. Wally turned into steam and floated back into the sky!\n\nThat's how the water cycle works — rain, river, sun, and back to the clouds! 🌈\n\n---\n\n📝 **Quiz Time!**\n1. What is the name of the water drop? ➤ Wally  \n2. Where did Wally fall from? ➤ A cloud ☁️  \n3. What turned Wally into steam? ➤ The Sun ☀️`
+          content: `💧 *Wally the Water Drop's Big Adventure* 🌧\n\nWally the Water Drop lived in a fluffy cloud. One day, he fell down as rain 🌧 and landed in a river. "Wheee!" he shouted. Then, the sun ☀ came out and warmed him up. Wally turned into steam and floated back into the sky!\n\nThat's how the water cycle works — rain, river, sun, and back to the clouds! 🌈\n\n---\n\n📝 *Quiz Time!*\n1. What is the name of the water drop? ➤ Wally  \n2. Where did Wally fall from? ➤ A cloud ☁  \n3. What turned Wally into steam? ➤ The Sun ☀`
         },
+
+        // EXAMPLE 2 – English / Practice Questions / Age 10 / Academic / With Quiz
         {
           role: "user",
           content: `Generate practice questions for a 10-year-old about "Fractions" in English using an academic tone. Include a quiz.`
         },
         {
           role: "assistant",
-          content: `📚 **Practice Questions on Fractions**\n\n1. What is 1/2 of 8? ➤ 4  \n2. Simplify the fraction 4/8 ➤ 1/2  \n3. What is the denominator in 3/5? ➤ 5  \n4. Which is larger: 2/3 or 3/4? ➤ 3/4  \n5. Write 0.75 as a fraction ➤ 3/4\n\n---\n\n📝 **Quick Quiz**\n1. What’s the simplified form of 6/9? ➤ 2/3  \n2. Which fraction means “half”? ➤ 1/2`
+          content: `📚 *Practice Questions on Fractions*\n\n1. What is 1/2 of 8? ➤ 4  \n2. Simplify the fraction 4/8 ➤ 1/2  \n3. What is the denominator in 3/5? ➤ 5  \n4. Which is larger: 2/3 or 3/4? ➤ 3/4  \n5. Write 0.75 as a fraction ➤ 3/4\n\n---\n\n📝 *Quick Quiz*\n1. What’s the simplified form of 6/9? ➤ 2/3  \n2. Which fraction means “half”? ➤ 1/2`
         },
+
+        // EXAMPLE 3 – English / Fun Activities / Age 14 / Playful / No Quiz
         {
           role: "user",
           content: `Generate fun activities for a 14-year-old about "Photosynthesis" in English using a playful tone.`
         },
         {
           role: "assistant",
-          content: `🌿 **Photosynthesis Activities for Teens**\n\n1. **Leaf Diary** 📓  \n   Collect leaves from different plants and track their exposure to sunlight. Record their condition daily.\n\n2. **Chlorophyll Art** 🎨  \n   Mash spinach leaves and use the green pigment to make creative posters explaining the process.\n\n3. **DIY Oxygen Experiment** 🧪  \n   Place a water plant in a clear bowl under sunlight. Watch bubbles form — that’s oxygen!\n\n4. **Rap Battle: Plant Style** 🎤  \n   Write a short rap explaining photosynthesis and perform it in a fun session!\n\n5. **Time-lapse Lab** ⏱️  \n   Take daily pictures of a growing plant and build a time-lapse video to present in class.`
+          content: `🌿 *Photosynthesis Activities for Teens*\n\n1. *Leaf Diary* 📓  \n   Collect leaves from different plants and track their exposure to sunlight. Record their condition daily.\n\n2. *Chlorophyll Art* 🎨  \n   Mash spinach leaves and use the green pigment to make creative posters explaining the process.\n\n3. *DIY Oxygen Experiment* 🧪  \n   Place a water plant in a clear bowl under sunlight. Watch bubbles form — that’s oxygen!\n\n4. *Rap Battle: Plant Style* 🎤  \n   Write a short rap explaining photosynthesis and perform it in a fun session!\n\n5. *Time-lapse Lab* ⏱  \n   Take daily pictures of a growing plant and build a time-lapse video to present in class.`
+        },
+
+        // EXAMPLE 4 – Hindi / Story / Age 6 / Fun / With Quiz
+        {
+          role: "user",
+          content: `Generate a story for a 6-year-old about "सौरमंडल" in Hindi using a fun tone. Include a quiz.`
+        },
+        {
+          role: "assistant",
+          content: `☀ *छोटा रोबोट और सौरमंडल की सैर* 🚀\n\nएक दिन छोटा रोबोट रॉकी ने अंतरिक्ष यान में उड़ान भरी। सबसे पहले वो सूरज के पास गया – "ओह, कितना गरम है!" 🔥 फिर वो बुध, शुक्र, पृथ्वी, मंगल… सब ग्रहों से मिला! हर ग्रह की खासियत जानकर वो बहुत खुश हुआ। 🌍🪐\n\nरॉकी ने सीखा कि हर ग्रह सूरज के चारों ओर घूमता है!\n\n---\n\n🧠 *प्रश्नोत्तरी*\n1. रॉकी कौन था? ➤ एक छोटा रोबोट 🤖  \n2. किसके चारों ओर ग्रह घूमते हैं? ➤ सूरज ☀  \n3. मंगल ग्रह का रंग कैसा होता है? ➤ लाल 🔴`
+        },
+
+        // EXAMPLE 5 – Hindi / Simple Explanation / Age 11 / Academic / With Quiz
+        {
+          role: "user",
+          content: `Generate a simple explanation for an 11-year-old about "प्रजातंत्र (Democracy)" in Hindi using an academic tone. Include a quiz.`
+        },
+        {
+          role: "assistant",
+          content: `📘 *प्रजातंत्र क्या है?*\n\nप्रजातंत्र एक ऐसी प्रणाली है जहाँ लोग अपने नेता खुद चुनते हैं। इसमें हर व्यक्ति को वोट देने का अधिकार होता है। जैसे स्कूल में मॉनिटर चुनते हैं, वैसे ही देश के लिए प्रधानमंत्री चुना जाता है।\n\nहर व्यक्ति की आवाज़ मायने रखती है, और सबको समान अधिकार होते हैं।\n\n---\n\n📝 *प्रश्नोत्तरी*\n1. प्रजातंत्र में नेता कौन चुनता है? ➤ जनता  \n2. क्या हर व्यक्ति को वोट देने का अधिकार होता है? ➤ हाँ  \n3. स्कूल में मॉनिटर चुनना किस चीज़ से मिलता-जुलता है? ➤ चुनाव से`
         }
       ];
     }
 
     // Build Perplexity messages array
+    // Accept richer content control from frontend/UI
+    const tone = (body.tone && typeof body.tone === 'string') ? body.tone : 'formal';
+    const language = (body.language && typeof body.language === 'string') ? body.language : 'English';
+    const includeQuiz = (typeof body.includeQuiz === 'boolean') ? body.includeQuiz : false;
+    const customInstructions = (body.customInstructions && typeof body.customInstructions === 'string') ? body.customInstructions : '';
     const payload = {
       ageGroup: parsedAgeGroup,
       subject: subject.trim(),
       contentType: normalizedContentType,
-      tone: 'formal', // You can extend this to accept from user input
-      language: 'English', // You can extend this to accept from user input
-      includeQuiz: false, // You can extend this to accept from user input
-      customInstructions: '' // You can extend this to accept from user input
+      tone,
+      language,
+      includeQuiz,
+      customInstructions
     };
+
     const systemPrompt = getSystemPrompt();
     const userPrompt = getUserPrompt(payload);
     const fewShots = getFewShotExamples();
