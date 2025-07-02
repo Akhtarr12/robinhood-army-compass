@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { Heart, Users, BookOpen, User, LogOut } from 'lucide-react';
-import ChildrenSection from './ChildrenSection';
-import RobinsSection from './RobinsSection';
+import EnhancedChildrenSection from './EnhancedChildrenSection';
+import EnhancedRobinsSection from './EnhancedRobinsSection';
 import EducationSection from './EducationSection';
 import AuthSection from './AuthSection';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,13 +25,13 @@ const MainAppContent = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'children':
-        return <ChildrenSection />;
+        return <EnhancedChildrenSection />;
       case 'robins':
-        return <RobinsSection />;
+        return <EnhancedRobinsSection />;
       case 'education':
         return <EducationSection />;
       default:
-        return <ChildrenSection />;
+        return <EnhancedChildrenSection />;
     }
   };
 

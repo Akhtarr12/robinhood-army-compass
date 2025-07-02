@@ -14,6 +14,7 @@ export interface Child {
   school_name: string | null;
   age_group: number;
   location: string | null;
+  tags: string[] | null;
   attendance_count: number;
   created_at: string;
   updated_at: string;
@@ -46,6 +47,7 @@ export interface ChildAttendance {
   child_id: string;
   date: string;
   location: string;
+  drive_id: string | null;
   created_at: string;
 }
 
@@ -55,7 +57,33 @@ export interface RobinDrive {
   date: string;
   location: string;
   attendance_marked: boolean;
+  commute_method: string | null;
+  contribution_message: string | null;
+  items_brought: any;
+  drive_id: string | null;
   created_at: string;
+}
+
+export interface RobinUnavailability {
+  id: string;
+  robin_id: string;
+  unavailable_date: string;
+  reason: string | null;
+  created_at: string;
+}
+
+export interface Drive {
+  id: string;
+  name: string;
+  date: string;
+  location: string;
+  summary: string | null;
+  robin_group_photo_url: string | null;
+  children_group_photo_url: string | null;
+  combined_group_photo_url: string | null;
+  items_distributed: any[] | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export const useSupabaseData = () => {
@@ -66,6 +94,8 @@ export const useSupabaseData = () => {
   const [educationalContent, setEducationalContent] = useState<EducationalContent[]>([]);
   const [childAttendance, setChildAttendance] = useState<ChildAttendance[]>([]);
   const [robinDrives, setRobinDrives] = useState<RobinDrive[]>([]);
+  const [robinUnavailability, setRobinUnavailability] = useState<RobinUnavailability[]>([]);
+  const [drives, setDrives] = useState<Drive[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Fetch children data
@@ -357,6 +387,8 @@ export const useSupabaseData = () => {
     educationalContent,
     childAttendance,
     robinDrives,
+    robinUnavailability,
+    drives,
     loading,
     addChild,
     addRobin,

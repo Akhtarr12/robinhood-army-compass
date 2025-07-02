@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, User, School, Hash, Calendar, MapPin, Trophy, Clock } from 'lucide-react';
+import { Plus, User, School, Hash, Calendar, MapPin, Trophy, Clock, Search, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSupabaseData, Child } from '@/hooks/useSupabaseData';
 
@@ -20,7 +20,16 @@ const locations = [
   'Uttam Nagar'
 ];
 
-const ChildrenSection = () => {
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
+const EnhancedChildrenSection = () => {
   const { 
     children, 
     childAttendance, 
@@ -34,6 +43,9 @@ const ChildrenSection = () => {
   const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [showAttendance, setShowAttendance] = useState<string | null>(null);
   const [attendanceLocation, setAttendanceLocation] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchLocation, setSearchLocation] = useState('');
+  const [currentTag, setCurrentTag] = useState('');
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -47,6 +59,18 @@ const ChildrenSection = () => {
     age_group: 1,
     tags: [] as string[]
   });
+
+  // Enhanced search functionality
+  const filteredChildren = useMemo(() => {
+    return children.filter(child => {
+      const matchesName = child.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesLocation = !searchLocation || child.location === searchLocation;
+      const matchesTags = !searchTerm || 
+        (child.tags && child.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+      
+      return (matchesName || matchesTags) && matchesLocation;
+    });
+  }, [children, searchTerm, searchLocation]);
 
   const resetForm = () => {
     setFormData({
@@ -137,6 +161,23 @@ const ChildrenSection = () => {
     }
   };
 
+  const addTag = () => {
+    if (currentTag && !formData.tags.includes(currentTag)) {
+      setFormData({ 
+        ...formData, 
+        tags: [...formData.tags, currentTag] 
+      });
+      setCurrentTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter(tag => tag !== tagToRemove)
+    });
+  };
+
   // Get leaderboard data (top 10 children by attendance)
   const leaderboard = children
     .sort((a, b) => (b.attendance_count || 0) - (a.attendance_count || 0))
@@ -158,6 +199,49 @@ const ChildrenSection = () => {
           Register Child
         </Button>
       </div>
+
+      {/* Enhanced Search */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Search Children
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Search by Name or Tag</Label>
+              <Input
+                placeholder="Enter name or tag..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Filter by Location</Label>
+              <Select value={searchLocation} onValueChange={setSearchLocation}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All locations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All locations</SelectItem>
+                  {locations.map((location) => (
+                    <SelectItem key={location} value={location}>
+                      {location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {(searchTerm || searchLocation) && (
+            <div className="mt-4 text-sm text-gray-600">
+              Found {filteredChildren.length} children
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -226,11 +310,11 @@ const ChildrenSection = () => {
                     <img
                       src={child.photo_url}
                       alt={child.name}
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
                     </div>
                   )}
                   <div>
@@ -356,6 +440,42 @@ const ChildrenSection = () => {
                 </Select>
               </div>
 
+              {/* Tags Section */}
+              <div className="md:col-span-2 space-y-2">
+                <Label>Tags (Optional)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add a tag..."
+                    value={currentTag}
+                    onChange={(e) => setCurrentTag(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                  />
+                  <Button type="button" onClick={addTag} variant="outline">
+                    <Tag className="h-4 w-4 mr-2" />
+                    Add
+                  </Button>
+                </div>
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="ml-1 text-blue-600 hover:text-blue-800"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="md:col-span-2 flex gap-3 pt-4">
                 <Button type="submit" disabled={loading} className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
                   {editingChild ? 'Update Child' : 'Register Child'}
@@ -371,7 +491,7 @@ const ChildrenSection = () => {
 
       {/* Children List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {children.map((child) => (
+        {filteredChildren.map((child) => (
           <Card key={child.id} className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -380,11 +500,11 @@ const ChildrenSection = () => {
                     <img
                       src={child.photo_url}
                       alt={child.name}
-                      className="w-16 h-16 rounded-full object-cover"
+                      className="w-20 h-20 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center">
-                      <User className="h-8 w-8 text-white" />
+                    <div className="w-20 h-20 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center">
+                      <User className="h-10 w-10 text-white" />
                     </div>
                   )}
                   <div>
@@ -424,9 +544,21 @@ const ChildrenSection = () => {
                     Location: {child.location}
                   </div>
                 )}
+                {child.tags && child.tags.length > 0 && (
+                  <div className="flex items-start text-gray-600">
+                    <Tag className="h-4 w-4 mr-2 mt-0.5" />
+                    <div className="flex flex-wrap gap-1">
+                      {child.tags.map((tag, index) => (
+                        <span key={index} className="px-2 py-1 bg-gray-100 rounded text-xs">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center text-gray-600">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Registered: {new Date(child.created_at).toLocaleDateString()}
+                  Registered: {formatDate(child.created_at)}
                 </div>
               </div>
 
@@ -478,6 +610,25 @@ const ChildrenSection = () => {
         ))}
       </div>
 
+      {filteredChildren.length === 0 && children.length > 0 && (
+        <Card className="text-center py-12">
+          <CardContent>
+            <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No children match your search</h3>
+            <p className="text-gray-600 mb-4">Try adjusting your search terms or filters.</p>
+            <Button 
+              onClick={() => {
+                setSearchTerm('');
+                setSearchLocation('');
+              }} 
+              variant="outline"
+            >
+              Clear Filters
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {children.length === 0 && !loading && (
         <Card className="text-center py-12">
           <CardContent>
@@ -495,4 +646,4 @@ const ChildrenSection = () => {
   );
 };
 
-export default ChildrenSection;
+export default EnhancedChildrenSection;

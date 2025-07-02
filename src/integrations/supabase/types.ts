@@ -14,6 +14,7 @@ export type Database = {
           child_id: string
           created_at: string
           date: string
+          drive_id: string | null
           id: string
           location: string
           user_id: string
@@ -22,6 +23,7 @@ export type Database = {
           child_id: string
           created_at?: string
           date?: string
+          drive_id?: string | null
           id?: string
           location: string
           user_id: string
@@ -30,6 +32,7 @@ export type Database = {
           child_id?: string
           created_at?: string
           date?: string
+          drive_id?: string | null
           id?: string
           location?: string
           user_id?: string
@@ -40,6 +43,13 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_attendance_drive_id_fkey"
+            columns: ["drive_id"]
+            isOneToOne: false
+            referencedRelation: "drives"
             referencedColumns: ["id"]
           },
         ]
@@ -57,6 +67,7 @@ export type Database = {
           name: string
           photo_url: string | null
           school_name: string | null
+          tags: string[] | null
           updated_at: string
           user_id: string
         }
@@ -72,6 +83,7 @@ export type Database = {
           name: string
           photo_url?: string | null
           school_name?: string | null
+          tags?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -87,6 +99,52 @@ export type Database = {
           name?: string
           photo_url?: string | null
           school_name?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      drives: {
+        Row: {
+          children_group_photo_url: string | null
+          combined_group_photo_url: string | null
+          created_at: string
+          date: string
+          id: string
+          items_distributed: Json | null
+          location: string
+          name: string
+          robin_group_photo_url: string | null
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          children_group_photo_url?: string | null
+          combined_group_photo_url?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          items_distributed?: Json | null
+          location: string
+          name: string
+          robin_group_photo_url?: string | null
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          children_group_photo_url?: string | null
+          combined_group_photo_url?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          items_distributed?: Json | null
+          location?: string
+          name?: string
+          robin_group_photo_url?: string | null
+          summary?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -152,34 +210,88 @@ export type Database = {
       robin_drives: {
         Row: {
           attendance_marked: boolean | null
+          commute_method: string | null
+          contribution_message: string | null
           created_at: string
           date: string
+          drive_id: string | null
           id: string
+          items_brought: Json | null
           location: string
           robin_id: string
           user_id: string
         }
         Insert: {
           attendance_marked?: boolean | null
+          commute_method?: string | null
+          contribution_message?: string | null
           created_at?: string
           date?: string
+          drive_id?: string | null
           id?: string
+          items_brought?: Json | null
           location: string
           robin_id: string
           user_id: string
         }
         Update: {
           attendance_marked?: boolean | null
+          commute_method?: string | null
+          contribution_message?: string | null
           created_at?: string
           date?: string
+          drive_id?: string | null
           id?: string
+          items_brought?: Json | null
           location?: string
           robin_id?: string
           user_id?: string
         }
         Relationships: [
           {
+            foreignKeyName: "robin_drives_drive_id_fkey"
+            columns: ["drive_id"]
+            isOneToOne: false
+            referencedRelation: "drives"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "robin_drives_robin_id_fkey"
+            columns: ["robin_id"]
+            isOneToOne: false
+            referencedRelation: "robins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      robin_unavailability: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string | null
+          robin_id: string
+          unavailable_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          robin_id: string
+          unavailable_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          robin_id?: string
+          unavailable_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "robin_unavailability_robin_id_fkey"
             columns: ["robin_id"]
             isOneToOne: false
             referencedRelation: "robins"
@@ -234,7 +346,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      gtrgm_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      set_limit: {
+        Args: { "": number }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: { "": string }
+        Returns: string[]
+      }
     }
     Enums: {
       [_ in never]: never
