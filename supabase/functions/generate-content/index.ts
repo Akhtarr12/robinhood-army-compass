@@ -59,7 +59,7 @@ serve(async (req) => {
           'Authorization': `Bearer ${perplexityApiKey}`
         },
         body: JSON.stringify({
-          model: 'llama-3-sonar-large-32k-online',
+          model: 'sonar-pro',
           messages: [
             { role: 'system', content: 'You are a helpful educational content generator for children.' },
             { role: 'user', content: prompt }
