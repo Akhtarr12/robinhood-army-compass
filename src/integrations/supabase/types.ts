@@ -216,6 +216,7 @@ export type Database = {
           date: string
           drive_id: string | null
           id: string
+          is_first_drive: boolean | null
           items_brought: Json | null
           location: string
           robin_id: string
@@ -229,6 +230,7 @@ export type Database = {
           date?: string
           drive_id?: string | null
           id?: string
+          is_first_drive?: boolean | null
           items_brought?: Json | null
           location: string
           robin_id: string
@@ -242,6 +244,7 @@ export type Database = {
           date?: string
           drive_id?: string | null
           id?: string
+          is_first_drive?: boolean | null
           items_brought?: Json | null
           location?: string
           robin_id?: string
@@ -307,9 +310,11 @@ export type Database = {
           drive_count: number | null
           home_location: string | null
           id: string
+          is_first_drive: boolean | null
           name: string
           photo_url: string | null
           status: string | null
+          total_drives_participated: number | null
           updated_at: string
           user_id: string
         }
@@ -320,9 +325,11 @@ export type Database = {
           drive_count?: number | null
           home_location?: string | null
           id?: string
+          is_first_drive?: boolean | null
           name: string
           photo_url?: string | null
           status?: string | null
+          total_drives_participated?: number | null
           updated_at?: string
           user_id: string
         }
@@ -333,9 +340,11 @@ export type Database = {
           drive_count?: number | null
           home_location?: string | null
           id?: string
+          is_first_drive?: boolean | null
           name?: string
           photo_url?: string | null
           status?: string | null
+          total_drives_participated?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -397,6 +406,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      set_initial_drive_count: {
+        Args: { _robin_id: string; _drive_count: number }
+        Returns: undefined
       }
       set_limit: {
         Args: { "": number }
