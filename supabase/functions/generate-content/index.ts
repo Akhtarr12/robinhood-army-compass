@@ -24,8 +24,8 @@ serve(async (req) => {
 
     // Validate and parse age group
     const parsedAgeGroup = parseInt(ageGroup);
-    if (isNaN(parsedAgeGroup) || parsedAgeGroup < 1 || parsedAgeGroup > 18) {
-      throw new Error('Invalid age group. Must be a number between 1 and 18');
+    if (isNaN(parsedAgeGroup) || parsedAgeGroup < 3 || parsedAgeGroup > 20) {
+      throw new Error('Invalid age group. Must be a number between 3 and 20');
     }
 
     // Validate content type

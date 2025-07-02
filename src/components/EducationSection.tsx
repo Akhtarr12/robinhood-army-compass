@@ -153,7 +153,7 @@ const EducationSection = () => {
                   <SelectValue placeholder="Select age" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((age) => (
+                  {Array.from({length: 18}, (_, i) => i + 3).map((age) => (
                     <SelectItem key={age} value={age.toString()}>
                       {age} years old
                     </SelectItem>
@@ -269,7 +269,7 @@ const EducationSection = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">No content generated yet</h3>
             <p className="text-gray-600 mb-4">Use the form above to generate educational content for children.</p>
             <div className="text-sm text-gray-500 space-y-1">
-              <p>• Select age group (1-8 years)</p>
+              <p>• Select age group (3-20 years)</p>
               <p>• Choose subject and content type</p>
               <p>• Click generate to create content</p>
             </div>

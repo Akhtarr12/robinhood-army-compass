@@ -347,7 +347,7 @@ const ChildrenSection = () => {
                     <SelectValue placeholder="Select age group" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({length: 20}, (_, i) => i + 1).map((age) => (
+                    {Array.from({length: 18}, (_, i) => i + 3).map((age) => (
                       <SelectItem key={age} value={age.toString()}>
                         {age} years old
                       </SelectItem>
