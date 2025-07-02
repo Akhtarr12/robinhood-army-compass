@@ -45,6 +45,16 @@ serve(async (req) => {
       throw new Error('PERPLEXITY_API_KEY not configured');
     }
 
+    // Map UI content types to allowed DB values
+    const typeMap: Record<string, string> = {
+      'story': 'story',
+      'practice questions': 'question',
+      'simple explanation': 'explanation',
+      'fun activities': 'story', // fallback mapping
+      'learning games': 'story'  // fallback mapping
+    };
+    const mappedContentType = typeMap[normalizedContentType] || 'story';
+
     // Create prompt based on content type
     const prompt = createPrompt(parsedAgeGroup, subject.trim(), normalizedContentType);
     console.log('Generated prompt:', prompt);
@@ -121,7 +131,7 @@ serve(async (req) => {
       user_id: userId,
       age_group: parsedAgeGroup,
       subject: subject.trim(),
-      content_type: normalizedContentType,
+      content_type: mappedContentType,
       content: generatedContent.trim()
       // Remove created_at - let the database handle it with default value
     };
