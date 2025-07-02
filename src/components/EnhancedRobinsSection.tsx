@@ -49,6 +49,7 @@ const EnhancedRobinsSection = () => {
     updateRobinLocation,
     addRobinUnavailability,
     uploadPhoto,
+    setInitialDriveCount,
     loading
   } = useSupabaseData();
 
@@ -81,6 +82,9 @@ const EnhancedRobinsSection = () => {
     reason: ''
   });
 
+  const [showFirstDriveDialog, setShowFirstDriveDialog] = useState<string | null>(null);
+  const [previousDriveCount, setPreviousDriveCount] = useState(0);
+  
   const [newLocation, setNewLocation] = useState('');
   const [currentItem, setCurrentItem] = useState('');
 
@@ -787,19 +791,110 @@ const EnhancedRobinsSection = () => {
                   </div>
                 </div>
               ) : (
-                <Button 
-                  size="sm" 
-                  onClick={() => setShowDriveForm(robin.id)}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                >
-                  <Car className="h-4 w-4 mr-2" />
-                  Record Drive
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    size="sm" 
+                    onClick={() => {
+                      // Check if this is potentially a first drive
+                      if ((robin.drive_count || 0) === 0) {
+                        setShowFirstDriveDialog(robin.id);
+                      } else {
+                        setShowDriveForm(robin.id);
+                      }
+                    }}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Car className="h-4 w-4 mr-2" />
+                    Record Drive
+                  </Button>
+                  
+                  {(robin.drive_count || 0) === 0 && (
+                    <Button 
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowFirstDriveDialog(robin.id)}
+                      className="w-full"
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      Setup Drive History
+                    </Button>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* First Drive Dialog */}
+      {showFirstDriveDialog && (
+        <Card className="border-2 border-yellow-300 bg-yellow-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-600" />
+              First Drive Setup
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-gray-700">
+                Welcome! Is this your first drive with Robinhood Army?
+              </p>
+              
+              <div className="flex gap-3">
+                <Button 
+                  onClick={async () => {
+                    // Mark as first drive (no action needed, already default)
+                    toast({
+                      title: "Welcome!",
+                      description: "Marked as your first drive. Good luck!",
+                    });
+                    setShowFirstDriveDialog(null);
+                  }}
+                  className="bg-yellow-600 hover:bg-yellow-700"
+                >
+                  Yes, This is My First Drive
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    // Show input for previous drive count
+                    const count = parseInt(prompt("How many drives have you participated in before?") || "0");
+                    if (count > 0) {
+                      setInitialDriveCount(showFirstDriveDialog, count).then(({ error }) => {
+                        if (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to update drive count.",
+                            variant: "destructive"
+                          });
+                        } else {
+                          toast({
+                            title: "Drive Count Updated",
+                            description: `Set previous drive count to ${count}`,
+                          });
+                        }
+                      });
+                    }
+                    setShowFirstDriveDialog(null);
+                  }}
+                  variant="outline"
+                >
+                  No, I've Done Drives Before
+                </Button>
+              </div>
+              
+              <Button 
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowFirstDriveDialog(null)}
+              >
+                Skip for now
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {filteredRobins.length === 0 && robins.length > 0 && (
         <Card className="text-center py-12">

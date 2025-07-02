@@ -202,8 +202,8 @@ const DriveManagementSection = () => {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* Enhanced Stats Cards with Real-time Data */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -234,15 +234,26 @@ const DriveManagementSection = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Participants</p>
+                <p className="text-sm font-medium text-gray-600">Active Robins Today</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {drives.reduce((sum, drive) => {
-                    const { participatingRobins, attendingChildren } = getDriveParticipants(drive.id);
-                    return sum + participatingRobins.length + attendingChildren.length;
-                  }, 0)}
+                  {robinDrives.filter(rd => rd.date === new Date().toISOString().split('T')[0]).length}
                 </p>
               </div>
               <Users className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">First-Time Robins</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {robinDrives.filter(rd => rd.robin_id && robins.find(r => r.id === rd.robin_id)?.is_first_drive).length}
+                </p>
+              </div>
+              <Star className="h-8 w-8 text-yellow-600" />
             </div>
           </CardContent>
         </Card>
@@ -261,6 +272,49 @@ const DriveManagementSection = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Real-time Drive Assignment Dashboard */}
+      <Card className="border-l-4 border-l-green-500">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-green-600" />
+            Today's Drive Assignments - Real Time Tracking
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {locations.map((location) => {
+              const todayRobins = robinDrives.filter(rd => 
+                rd.location === location && 
+                rd.date === new Date().toISOString().split('T')[0]
+              );
+              const firstTimeRobins = todayRobins.filter(rd => 
+                robins.find(r => r.id === rd.robin_id)?.is_first_drive
+              );
+              
+              return (
+                <div key={location} className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-800 mb-2">{location}</h4>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span>Total Robins:</span>
+                      <span className="font-bold text-green-600">{todayRobins.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>First-Time Robins:</span>
+                      <span className="font-bold text-yellow-600">{firstTimeRobins.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Experienced:</span>
+                      <span className="font-bold text-blue-600">{todayRobins.length - firstTimeRobins.length}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Drive Creation/Edit Form */}
       {showForm && (

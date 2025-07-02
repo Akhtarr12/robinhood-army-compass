@@ -31,6 +31,8 @@ export interface Robin {
   status: string | null;
   created_at: string;
   updated_at: string;
+  is_first_drive?: boolean;
+  total_drives_participated?: number;
 }
 
 export interface EducationalContent {
@@ -62,6 +64,7 @@ export interface RobinDrive {
   items_brought: any;
   drive_id: string | null;
   created_at: string;
+  is_first_drive?: boolean;
 }
 
 export interface RobinUnavailability {
@@ -432,6 +435,24 @@ export const useSupabaseData = () => {
     }
   };
 
+  // Set initial drive count for existing users
+  const setInitialDriveCount = async (robinId: string, driveCount: number) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase.rpc('set_initial_drive_count', {
+      _robin_id: robinId,
+      _drive_count: driveCount
+    });
+
+    if (error) {
+      console.error('Error setting initial drive count:', error);
+      return { error };
+    }
+
+    fetchRobins(); // Refresh to get updated data
+    return { data };
+  };
+
   // Set up real-time subscriptions
   useEffect(() => {
     if (!user) return;
@@ -534,6 +555,7 @@ export const useSupabaseData = () => {
     fetchChildAttendance,
     fetchRobinDrives,
     fetchDrives,
-    fetchRobinUnavailability
+    fetchRobinUnavailability,
+    setInitialDriveCount
   };
 };
