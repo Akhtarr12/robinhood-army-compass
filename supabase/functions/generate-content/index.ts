@@ -40,80 +40,52 @@ serve(async (req) => {
       throw new Error('Subject must be a non-empty string');
     }
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY not configured');
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
     // Create prompt based on content type
     const prompt = createPrompt(parsedAgeGroup, subject.trim(), normalizedContentType);
     console.log('Generated prompt:', prompt);
 
-    // Try different Gemini API endpoints
-    const geminiEndpoints = [
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`,
-      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${geminiApiKey}`,
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`
-    ];
-
+    // Call OpenAI API (gpt-3.5-turbo)
     let response;
-    let lastError;
-
-    for (const endpoint of geminiEndpoints) {
-      try {
-        console.log('Trying endpoint:', endpoint);
-        response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: prompt
-                  }
-                ]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 1000,
-              topP: 0.8,
-              topK: 40
-            }
-          })
-        });
-
-        if (response.ok) {
-          console.log('Success with endpoint:', endpoint);
-          break;
-        } else {
-          const errorText = await response.text();
-          console.log(`Failed: ${response.status} - ${errorText}`);
-          lastError = `${response.status}: ${errorText}`;
-        }
-      } catch (error) {
-        console.log('Endpoint error:', error.message);
-        lastError = error.message;
-        continue;
-      }
+    try {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            { role: 'system', content: 'You are a helpful educational content generator for children.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 1000,
+          top_p: 0.8
+        })
+      });
+    } catch (error) {
+      throw new Error('Failed to call OpenAI API: ' + error.message);
     }
 
     if (!response || !response.ok) {
-      throw new Error(`All Gemini endpoints failed. Last error: ${lastError}`);
+      const errorText = await response.text();
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Gemini response:', data);
+    console.log('OpenAI response:', data);
 
-    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-      throw new Error('Invalid response from Gemini API');
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      throw new Error('Invalid response from OpenAI API');
     }
 
-    const generatedContent = data.candidates[0].content.parts[0].text;
+    const generatedContent = data.choices[0].message.content;
     
     // Validate generated content
     if (!generatedContent || generatedContent.trim().length === 0) {
