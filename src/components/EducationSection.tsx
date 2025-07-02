@@ -38,11 +38,27 @@ const contentTypes = [
   'Learning Games'
 ];
 
+const toneOptions = [
+  'Formal',
+  'Fun',
+  'Playful',
+  'Academic',
+  'Story-based'
+];
+const languageOptions = [
+  'English',
+  'Hindi'
+];
+
 const EducationSection = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedContentType, setSelectedContentType] = useState('');
+  const [selectedTone, setSelectedTone] = useState('Formal');
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [includeQuiz, setIncludeQuiz] = useState(false);
+  const [customInstructions, setCustomInstructions] = useState('');
   const { toast } = useToast();
   const { user } = useAuth();
   const { educationalContent, fetchEducationalContent } = useSupabaseData();
@@ -66,7 +82,11 @@ const EducationSection = () => {
           ageGroup: selectedAgeGroup,
           subject: selectedSubject,
           contentType: selectedContentType,
-          userId: user.id
+          userId: user.id,
+          tone: selectedTone,
+          language: selectedLanguage,
+          includeQuiz,
+          customInstructions
         }
       });
 
@@ -192,6 +212,62 @@ const EducationSection = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Tone</label>
+              <Select value={selectedTone} onValueChange={setSelectedTone}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select tone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {toneOptions.map((tone) => (
+                    <SelectItem key={tone} value={tone}>
+                      {tone}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Language</label>
+              <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {languageOptions.map((lang) => (
+                    <SelectItem key={lang} value={lang}>
+                      {lang}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                id="includeQuiz"
+                type="checkbox"
+                checked={includeQuiz}
+                onChange={e => setIncludeQuiz(e.target.checked)}
+                className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded"
+              />
+              <label htmlFor="includeQuiz" className="text-sm font-medium text-gray-700">
+                Include Quiz
+              </label>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="customInstructions" className="text-sm font-medium text-gray-700">Custom Instructions</label>
+              <Textarea
+                id="customInstructions"
+                value={customInstructions}
+                onChange={e => setCustomInstructions(e.target.value)}
+                placeholder="e.g. Use animal characters, make it rhyme, etc. (optional)"
+                className="resize-none min-h-[40px]"
+              />
             </div>
           </div>
 
