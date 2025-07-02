@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseData } from '@/hooks/useSupabaseData';
+import jsPDF from 'jspdf';
 
 interface GeneratedContent {
   id: string;
@@ -134,17 +135,21 @@ const EducationSection = () => {
   };
 
   const downloadContent = (content: any) => {
-    const element = document.createElement('a');
-    const file = new Blob([content.content], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `${content.subject}_${content.content_type}_Age${content.age_group}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    
+    const doc = new jsPDF();
+    const title = `${content.subject} - ${content.content_type} (Age ${content.age_group})`;
+    doc.setFontSize(16);
+    doc.text(title, 10, 20);
+    doc.setFontSize(12);
+
+    // Split content into lines that fit the page width
+    const lines = doc.splitTextToSize(content.content, 180);
+    doc.text(lines, 10, 35);
+
+    doc.save(`${content.subject}_${content.content_type}_Age${content.age_group}.pdf`);
+
     toast({
       title: "Downloaded",
-      description: "Content has been downloaded successfully.",
+      description: "Content has been downloaded as PDF successfully.",
     });
   };
 
