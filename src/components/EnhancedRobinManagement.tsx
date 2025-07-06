@@ -746,7 +746,7 @@ const EnhancedRobinManagement = () => {
                     </Button>
                   )}
 
-                  {profilePermissions[robin.id] ? (
+                  {profilePermissions[robin.id] && user?.id === robin.profile_created_by ? (
                     <Button 
                       size="sm" 
                       onClick={() => {
@@ -877,7 +877,7 @@ const EnhancedRobinManagement = () => {
                                 });
                                 setShowUnavailabilityForm(null);
                                 setUnavailabilityData({ date: '', reason: '' });
-                                // Re-fetch today's assigned Robins
+                                // Re-fetch today's assigned Robins and all robins
                                 const { data } = await getTodaysAssignedRobins();
                                 if (data) setTodaysAssignedRobins(data);
                               }
