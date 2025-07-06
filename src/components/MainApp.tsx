@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Heart, Users, BookOpen, User, LogOut, Car } from 'lucide-react';
 import EnhancedChildrenSection from './EnhancedChildrenSection';
-import EnhancedRobinsSection from './EnhancedRobinsSection';
+import EnhancedRobinManagement from './EnhancedRobinManagement';
 import EducationSection from './EducationSection';
-import DriveManagementSection from './DriveManagementSection';
+import EnhancedDriveManagement from './EnhancedDriveManagement';
 import AuthSection from './AuthSection';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthProvider } from '@/hooks/useAuth';
@@ -28,11 +28,11 @@ const MainAppContent = () => {
       case 'children':
         return <EnhancedChildrenSection />;
       case 'robins':
-        return <EnhancedRobinsSection />;
+        return <EnhancedRobinManagement />;
       case 'education':
         return <EducationSection />;
       case 'drives':
-        return <DriveManagementSection />;
+        return <EnhancedDriveManagement />;
       default:
         return <EnhancedChildrenSection />;
     }

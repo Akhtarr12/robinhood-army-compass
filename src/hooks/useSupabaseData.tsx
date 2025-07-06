@@ -29,6 +29,14 @@ export interface Robin {
   home_location: string | null;
   drive_count: number;
   status: string | null;
+  email?: string | null;
+  phone?: string | null;
+  emergency_contact?: string | null;
+  skills?: string[] | null;
+  availability_preferences?: string | null;
+  registration_completed?: boolean;
+  profile_created_by?: string | null;
+  can_edit_profile?: boolean;
   created_at: string;
   updated_at: string;
   is_first_drive?: boolean;
@@ -72,6 +80,10 @@ export interface RobinUnavailability {
   robin_id: string;
   unavailable_date: string;
   reason: string | null;
+  status: string;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  notification_sent?: boolean;
   created_at: string;
 }
 
@@ -396,27 +408,25 @@ export const useSupabaseData = () => {
     return { data };
   };
 
-  // Add robin unavailability
+  // Add robin unavailability with enhanced functionality
   const addRobinUnavailability = async (robinId: string, date: string, reason?: string) => {
     if (!user) return { error: 'Not authenticated' };
 
-    const { data, error } = await supabase
-      .from('robin_unavailability')
-      .insert([{ 
-        robin_id: robinId, 
-        unavailable_date: date, 
-        reason: reason || null,
-        user_id: user.id 
-      }])
-      .select()
-      .single();
+    // Use the new function for better handling
+    const { data, error } = await supabase.rpc('mark_robin_unavailable', {
+      _robin_id: robinId,
+      _unavailable_date: date,
+      _reason: reason || null
+    });
 
     if (error) {
       console.error('Error adding robin unavailability:', error);
       return { error };
     }
 
-    setRobinUnavailability(prev => [data, ...prev]);
+    // Refresh data to get updated status
+    await fetchRobinUnavailability();
+    await fetchRobins();
     return { data };
   };
 
@@ -451,6 +461,67 @@ export const useSupabaseData = () => {
 
     fetchRobins(); // Refresh to get updated data
     return { data };
+  };
+
+  // Complete robin registration
+  const completeRobinRegistration = async (robinId: string, profileData: {
+    email?: string;
+    phone?: string;
+    emergency_contact?: string;
+    skills?: string[];
+    availability_preferences?: string;
+  }) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase
+      .from('robins')
+      .update({ 
+        ...profileData,
+        registration_completed: true,
+        profile_created_by: user.id
+      })
+      .eq('id', robinId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error completing robin registration:', error);
+      return { error };
+    }
+
+    setRobins(prev => prev.map(r => r.id === robinId ? { ...r, ...data } : r));
+    return { data };
+  };
+
+  // Get today's assigned robins
+  const getTodaysAssignedRobins = async () => {
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data, error } = await supabase.rpc('get_todays_assigned_robins');
+
+    if (error) {
+      console.error('Error fetching today\'s assigned robins:', error);
+      return { error };
+    }
+
+    return { data };
+  };
+
+  // Check if user can edit robin profile
+  const canEditRobinProfile = async (robinId: string) => {
+    if (!user) return false;
+
+    const { data, error } = await supabase.rpc('can_edit_robin_profile', {
+      _robin_id: robinId,
+      _user_id: user.id
+    });
+
+    if (error) {
+      console.error('Error checking profile permissions:', error);
+      return false;
+    }
+
+    return data;
   };
 
   // Set up real-time subscriptions
@@ -549,6 +620,9 @@ export const useSupabaseData = () => {
     updateDrive,
     updateRobinLocation,
     addRobinUnavailability,
+    completeRobinRegistration,
+    getTodaysAssignedRobins,
+    canEditRobinProfile,
     fetchChildren,
     fetchRobins,
     fetchEducationalContent,
