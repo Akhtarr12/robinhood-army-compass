@@ -434,7 +434,7 @@ const EnhancedRobinManagement = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="location">Filter by Location</Label>
-              <Select value={searchLocation} onValueChange={setSearchLocation}>
+              <Select value={searchLocation || ''} onValueChange={setSearchLocation}>
                 <SelectTrigger>
                   <SelectValue placeholder="All locations" />
                 </SelectTrigger>
@@ -533,11 +533,12 @@ const EnhancedRobinManagement = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="assigned_location">Assigned Location *</Label>
-                <Select value={formData.assigned_location} onValueChange={(value) => setFormData({ ...formData, assigned_location: value })}>
+                <Select value={formData.assigned_location || ''} onValueChange={(value) => setFormData({ ...formData, assigned_location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select assigned location" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Select assigned location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
@@ -549,11 +550,12 @@ const EnhancedRobinManagement = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="home_location">Home Location</Label>
-                <Select value={formData.home_location} onValueChange={(value) => setFormData({ ...formData, home_location: value })}>
+                <Select value={formData.home_location || ''} onValueChange={(value) => setFormData({ ...formData, home_location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select home location" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Select home location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
