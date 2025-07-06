@@ -276,11 +276,12 @@ const RobinsSection = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="assigned_location">Assigned Location *</Label>
-                <Select value={formData.assigned_location} onValueChange={(value) => setFormData({ ...formData, assigned_location: value })}>
+                <Select value={formData.assigned_location || ''} onValueChange={(value) => setFormData({ ...formData, assigned_location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select assigned location" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Select assigned location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
@@ -292,11 +293,12 @@ const RobinsSection = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="home_location">Home Location</Label>
-                <Select value={formData.home_location} onValueChange={(value) => setFormData({ ...formData, home_location: value })}>
+                <Select value={formData.home_location || ''} onValueChange={(value) => setFormData({ ...formData, home_location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select home location" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Select home location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
@@ -419,11 +421,12 @@ const RobinsSection = () => {
               {showDriveForm === robin.id ? (
                 <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
                   <Label>Record Drive</Label>
-                  <Select value={driveLocation} onValueChange={setDriveLocation}>
+                  <Select value={driveLocation || ''} onValueChange={setDriveLocation}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select drive location" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="">Select drive location</SelectItem>
                       {locations.map((location) => (
                         <SelectItem key={location} value={location}>
                           {location}
