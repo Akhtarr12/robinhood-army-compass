@@ -262,13 +262,13 @@ const EnhancedRobinsSection = () => {
             </div>
             <div className="space-y-2">
               <Label>Filter by Location</Label>
-              <Select value={searchLocation || "all"} onValueChange={(value) => setSearchLocation(value === "all" ? "" : value)}>
+              <Select value={searchLocation || ''} onValueChange={setSearchLocation}>
                 <SelectTrigger>
                   <SelectValue placeholder="All locations" />
                 </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All locations</SelectItem>
-                    {locations.map((location) => (
+                <SelectContent>
+                  <SelectItem value="">All locations</SelectItem>
+                  {locations.map((location) => (
                     <SelectItem key={location} value={location}>
                       {location}
                     </SelectItem>
@@ -431,11 +431,12 @@ const EnhancedRobinsSection = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="assigned_location">Assigned Location *</Label>
-                <Select value={formData.assigned_location} onValueChange={(value) => setFormData({ ...formData, assigned_location: value })}>
+                <Select value={formData.assigned_location || ''} onValueChange={(value) => setFormData({ ...formData, assigned_location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select assigned location" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Select assigned location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
@@ -447,11 +448,12 @@ const EnhancedRobinsSection = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="home_location">Home Location</Label>
-                <Select value={formData.home_location} onValueChange={(value) => setFormData({ ...formData, home_location: value })}>
+                <Select value={formData.home_location || ''} onValueChange={(value) => setFormData({ ...formData, home_location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select home location" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Select home location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
@@ -592,11 +594,12 @@ const EnhancedRobinsSection = () => {
               {showLocationEdit === robin.id && (
                 <div className="space-y-3 p-3 bg-blue-50 rounded-lg mb-4">
                   <Label>Update Assigned Location</Label>
-                  <Select value={newLocation} onValueChange={setNewLocation}>
+                  <Select value={newLocation || ''} onValueChange={setNewLocation}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select new location" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="">Select new location</SelectItem>
                       {locations.map((location) => (
                         <SelectItem key={location} value={location}>
                           {location}
@@ -707,11 +710,12 @@ const EnhancedRobinsSection = () => {
               {showDriveForm === robin.id ? (
                 <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
                   <Label>Record Drive</Label>
-                  <Select value={driveFormData.location} onValueChange={(value) => setDriveFormData({...driveFormData, location: value})}>
+                  <Select value={driveFormData.location || ''} onValueChange={(value) => setDriveFormData({...driveFormData, location: value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select drive location" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="">Select drive location</SelectItem>
                       {locations.map((location) => (
                         <SelectItem key={location} value={location}>
                           {location}
@@ -720,11 +724,12 @@ const EnhancedRobinsSection = () => {
                     </SelectContent>
                   </Select>
                   
-                  <Select value={driveFormData.commute_method} onValueChange={(value) => setDriveFormData({...driveFormData, commute_method: value})}>
+                  <Select value={driveFormData.commute_method || ''} onValueChange={(value) => setDriveFormData({...driveFormData, commute_method: value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="How did you arrive?" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="">How did you arrive?</SelectItem>
                       {commuteOptions.map((option) => (
                         <SelectItem key={option} value={option}>
                           {option}
