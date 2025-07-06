@@ -496,8 +496,8 @@ const EnhancedDriveManagement = () => {
                   <SelectContent>
                     <SelectItem value="">Select location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                      <SelectItem key={location} value={location || 'unknown'}>
+                        {location || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
