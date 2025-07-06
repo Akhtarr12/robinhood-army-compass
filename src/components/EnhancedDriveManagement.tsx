@@ -489,11 +489,12 @@ const EnhancedDriveManagement = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="location">Location *</Label>
-                <Select value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}>
+                <Select value={formData.location || ''} onValueChange={(value) => setFormData({ ...formData, location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Select location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
