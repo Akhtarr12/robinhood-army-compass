@@ -269,8 +269,8 @@ const EnhancedRobinsSection = () => {
                 <SelectContent>
                   <SelectItem value="">All locations</SelectItem>
                   {locations.map((location) => (
-                    <SelectItem key={location} value={location}>
-                      {location}
+                    <SelectItem key={location} value={location || 'unknown'}>
+                      {location || 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -438,8 +438,8 @@ const EnhancedRobinsSection = () => {
                   <SelectContent>
                     <SelectItem value="">Select assigned location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                      <SelectItem key={location} value={location || 'unknown'}>
+                        {location || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -455,8 +455,8 @@ const EnhancedRobinsSection = () => {
                   <SelectContent>
                     <SelectItem value="">Select home location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                      <SelectItem key={location} value={location || 'unknown'}>
+                        {location || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -601,8 +601,8 @@ const EnhancedRobinsSection = () => {
                     <SelectContent>
                       <SelectItem value="">Select new location</SelectItem>
                       {locations.map((location) => (
-                        <SelectItem key={location} value={location}>
-                          {location}
+                        <SelectItem key={location} value={location || 'unknown'}>
+                          {location || 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -717,8 +717,8 @@ const EnhancedRobinsSection = () => {
                     <SelectContent>
                       <SelectItem value="">Select drive location</SelectItem>
                       {locations.map((location) => (
-                        <SelectItem key={location} value={location}>
-                          {location}
+                        <SelectItem key={location} value={location || 'unknown'}>
+                          {location || 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -731,8 +731,8 @@ const EnhancedRobinsSection = () => {
                     <SelectContent>
                       <SelectItem value="">How did you arrive?</SelectItem>
                       {commuteOptions.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
+                        <SelectItem key={option} value={option || 'unknown'}>
+                          {option || 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>

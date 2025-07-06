@@ -227,8 +227,8 @@ const EnhancedChildrenSection = () => {
                 <SelectContent>
                   <SelectItem value="">All locations</SelectItem>
                   {locations.map((location) => (
-                    <SelectItem key={location} value={location}>
-                      {location}
+                    <SelectItem key={location} value={location || 'unknown'}>
+                      {location || 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -417,8 +417,8 @@ const EnhancedChildrenSection = () => {
                   <SelectContent>
                     <SelectItem value="">Select usual location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                      <SelectItem key={location} value={location || 'unknown'}>
+                        {location || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -573,8 +573,8 @@ const EnhancedChildrenSection = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {locations.map((location) => (
-                        <SelectItem key={location} value={location}>
-                          {location}
+                        <SelectItem key={location} value={location || 'unknown'}>
+                          {location || 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>
