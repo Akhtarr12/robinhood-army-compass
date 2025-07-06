@@ -55,17 +55,13 @@ const commuteOptions = [
   'Auto-Rickshaw'
 ];
 
-const skillOptions = [
-  'Teaching',
-  'First Aid',
-  'Cooking',
-  'Transportation',
-  'Organization',
-  'Communication',
-  'Technical Skills',
-  'Medical Knowledge',
-  'Child Care',
-  'Event Planning'
+const designationOptions = [
+  'Volunteer',
+  'Head',
+  'Coordinator',
+  'Lead',
+  'Support',
+  'Custom'
 ];
 
 const EnhancedRobinManagement = () => {
@@ -107,7 +103,8 @@ const EnhancedRobinManagement = () => {
     email: '',
     phone: '',
     emergency_contact: '',
-    skills: [] as string[],
+    designation: '',
+    customDesignation: '',
     availability_preferences: ''
   });
 
@@ -127,7 +124,6 @@ const EnhancedRobinManagement = () => {
   const [previousDriveCount, setPreviousDriveCount] = useState(0);
   const [newLocation, setNewLocation] = useState('');
   const [currentItem, setCurrentItem] = useState('');
-  const [currentSkill, setCurrentSkill] = useState('');
 
   // Enhanced search functionality
   const filteredRobins = useMemo(() => {
@@ -183,7 +179,8 @@ const EnhancedRobinManagement = () => {
       email: '',
       phone: '',
       emergency_contact: '',
-      skills: [],
+      designation: '',
+      customDesignation: '',
       availability_preferences: ''
     });
     setEditingRobin(null);
@@ -203,11 +200,13 @@ const EnhancedRobinManagement = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const designationToSave = formData.designation === 'Custom' ? formData.customDesignation : formData.designation;
     const robinData = {
       ...formData,
       drive_count: 0,
       status: 'active',
-      registration_completed: false
+      registration_completed: false,
+      designation: designationToSave
     };
 
     const { error } = await addRobin(robinData);
@@ -232,7 +231,8 @@ const EnhancedRobinManagement = () => {
       email: formData.email,
       phone: formData.phone,
       emergency_contact: formData.emergency_contact,
-      skills: formData.skills,
+      designation: formData.designation,
+      customDesignation: formData.customDesignation,
       availability_preferences: formData.availability_preferences
     };
 
@@ -322,23 +322,6 @@ const EnhancedRobinManagement = () => {
     });
   };
 
-  const addSkill = () => {
-    if (currentSkill && !formData.skills.includes(currentSkill)) {
-      setFormData({
-        ...formData,
-        skills: [...formData.skills, currentSkill]
-      });
-      setCurrentSkill('');
-    }
-  };
-
-  const removeSkill = (skillToRemove: string) => {
-    setFormData({
-      ...formData,
-      skills: formData.skills.filter(skill => skill !== skillToRemove)
-    });
-  };
-
   // Check if robin is first-time (drive_count === 0 or 1)
   const isFirstTimeRobin = (robin: Robin) => {
     return (robin.drive_count || 0) <= 1;
@@ -348,6 +331,9 @@ const EnhancedRobinManagement = () => {
   const leaderboard = robins
     .sort((a, b) => (b.drive_count || 0) - (a.drive_count || 0))
     .slice(0, 10);
+
+  // Find today's date in YYYY-MM-DD format
+  const todayStr = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="space-y-6">
@@ -619,39 +605,25 @@ const EnhancedRobinManagement = () => {
                 />
               </div>
 
-              <div className="md:col-span-2 space-y-2">
-                <Label>Skills</Label>
-                <div className="flex gap-2 flex-wrap">
-                  {formData.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary" className="gap-1">
-                      {skill}
-                      <button
-                        type="button"
-                        onClick={() => removeSkill(skill)}
-                        className="ml-1 hover:text-red-600"
-                      >
-                        <XCircle className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Select value={currentSkill && currentSkill !== '' ? currentSkill : 'none'} onValueChange={setCurrentSkill}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Add skill" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {skillOptions.map((skill) => (
-                        <SelectItem key={skill} value={skill && skill !== '' ? skill : 'none'}>
-                          {skill && skill !== '' ? skill : 'Unknown'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button type="button" onClick={addSkill} size="sm">
-                    Add
-                  </Button>
-                </div>
+              <div className="space-y-2">
+                <Label>Designation</Label>
+                <Select value={formData.designation || 'none'} onValueChange={value => setFormData({ ...formData, designation: value })}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select designation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {designationOptions.map(option => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.designation === 'Custom' && (
+                  <Input
+                    placeholder="Enter custom designation"
+                    value={formData.customDesignation || ''}
+                    onChange={e => setFormData({ ...formData, customDesignation: e.target.value })}
+                  />
+                )}
               </div>
 
               <div className="md:col-span-2 flex gap-3 pt-4">
@@ -692,373 +664,362 @@ const EnhancedRobinManagement = () => {
 
       {/* Robins List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredRobins.map((robin) => (
-          <Card key={robin.id} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  {robin.photo_url ? (
-                    <img
-                      src={robin.photo_url}
-                      alt={robin.name}
-                      className="w-20 h-20 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center">
-                      <User className="h-10 w-10 text-white" />
+        {filteredRobins.map((robin) => {
+          const isAssignedToday = todaysAssignedRobins.some(r => r.id === robin.id);
+          return (
+            <Card key={robin.id} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    {robin.photo_url ? (
+                      <img
+                        src={robin.photo_url}
+                        alt={robin.name}
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center">
+                        <User className="h-10 w-10 text-white" />
+                      </div>
+                    )}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-gray-900">{robin.name}</h3>
+                        {isFirstTimeRobin(robin) && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                            <Star className="h-3 w-3 mr-1" />
+                            New
+                          </span>
+                        )}
+                        {!robin.registration_completed && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
+                            <AlertTriangle className="h-3 w-3 mr-1" />
+                            Incomplete
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500">Volunteer</p>
+                      <p className="text-sm text-blue-600 font-medium">
+                        {robin.drive_count || 0} drives completed
+                      </p>
                     </div>
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">{robin.name}</h3>
-                      {isFirstTimeRobin(robin) && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
-                          <Star className="h-3 w-3 mr-1" />
-                          New
-                        </span>
-                      )}
-                      {!robin.registration_completed && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                          Incomplete
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500">Volunteer</p>
-                    <p className="text-sm text-blue-600 font-medium">
-                      {robin.drive_count || 0} drives completed
-                    </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">Assigned: {robin.assigned_location}</span>
-                </div>
-                {robin.home_location && (
+                <div className="space-y-3 mb-4">
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-600">Home: {robin.home_location}</span>
+                    <span className="text-gray-600">Assigned: {robin.assigned_location}</span>
                   </div>
-                )}
-                {robin.email && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-600">{robin.email}</span>
-                  </div>
-                )}
-                {robin.phone && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-600">{robin.phone}</span>
-                  </div>
-                )}
-                {robin.skills && robin.skills.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {robin.skills.slice(0, 3).map((skill) => (
-                      <Badge key={skill} variant="outline" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                    {robin.skills.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{robin.skills.length - 3} more
-                      </Badge>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-2">
-                {!robin.registration_completed && profilePermissions[robin.id] && (
-                  <Button 
-                    size="sm" 
-                    onClick={() => setShowProfileDialog(robin.id)}
-                    className="w-full bg-orange-600 hover:bg-orange-700"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Complete Registration
-                  </Button>
-                )}
-
-                {profilePermissions[robin.id] ? (
-                  <Button 
-                    size="sm" 
-                    onClick={() => {
-                      setEditingRobin(robin);
-                      setFormData({
-                        name: robin.name,
-                        photo_url: robin.photo_url,
-                        assigned_location: robin.assigned_location,
-                        home_location: robin.home_location || '',
-                        assigned_date: robin.assigned_date,
-                        email: robin.email || '',
-                        phone: robin.phone || '',
-                        emergency_contact: robin.emergency_contact || '',
-                        skills: robin.skills || [],
-                        availability_preferences: robin.availability_preferences || ''
-                      });
-                      setShowForm(true);
-                    }}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                ) : (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => setShowProfileDialog(robin.id)}
-                    className="w-full"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Profile
-                  </Button>
-                )}
-
-                {/* Location Update Form */}
-                {showLocationEdit === robin.id && (
-                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg mb-4">
-                    <Label>Update Assigned Location</Label>
-                    <Select value={newLocation && newLocation !== '' ? newLocation : 'none'} onValueChange={setNewLocation}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select new location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Select new location</SelectItem>
-                        {locations.map((location) => (
-                          <SelectItem key={location} value={location && location !== '' ? location : 'none'}>
-                            {location && location !== '' ? location : 'Unknown'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        onClick={async () => {
-                          const { error } = await updateRobinLocation(robin.id, newLocation);
-                          if (error) {
-                            toast({
-                              title: "Error",
-                              description: "Failed to update location.",
-                              variant: "destructive"
-                            });
-                          } else {
-                            toast({
-                              title: "Location Updated",
-                              description: `${robin.name}'s location updated to ${newLocation}`,
-                            });
-                            setShowLocationEdit(null);
-                            setNewLocation('');
-                          }
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        Update
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => setShowLocationEdit(null)}
-                      >
-                        Cancel
-                      </Button>
+                  {robin.home_location && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-gray-400" />
+                      <span className="text-gray-600">Home: {robin.home_location}</span>
                     </div>
-                  </div>
-                )}
+                  )}
+                  {robin.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-4 w-4 text-gray-400" />
+                      <span className="text-gray-600">{robin.email}</span>
+                    </div>
+                  )}
+                  {robin.phone && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="h-4 w-4 text-gray-400" />
+                      <span className="text-gray-600">{robin.phone}</span>
+                    </div>
+                  )}
+                </div>
 
-                {/* Unavailability Form */}
-                {showUnavailabilityForm === robin.id ? (
-                  <div className="space-y-3 p-3 bg-orange-50 rounded-lg mb-4">
-                    <Label>Mark Unavailable</Label>
-                    <Input
-                      type="date"
-                      value={unavailabilityData.date}
-                      onChange={(e) => setUnavailabilityData({
-                        ...unavailabilityData,
-                        date: e.target.value
-                      })}
-                    />
-                    <Input
-                      placeholder="Reason (optional)"
-                      value={unavailabilityData.reason}
-                      onChange={(e) => setUnavailabilityData({
-                        ...unavailabilityData,
-                        reason: e.target.value
-                      })}
-                    />
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        onClick={async () => {
-                          const { error } = await addRobinUnavailability(
-                            robin.id, 
-                            unavailabilityData.date, 
-                            unavailabilityData.reason
-                          );
-                          if (error) {
-                            toast({
-                              title: "Error",
-                              description: "Failed to mark unavailable.",
-                              variant: "destructive"
-                            });
-                          } else {
-                            toast({
-                              title: "Unavailable Marked",
-                              description: `${robin.name} marked as unavailable for ${unavailabilityData.date}`,
-                            });
-                            setShowUnavailabilityForm(null);
-                            setUnavailabilityData({ date: '', reason: '' });
-                          }
-                        }}
-                        className="bg-orange-600 hover:bg-orange-700"
-                      >
-                        Mark Unavailable
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => setShowUnavailabilityForm(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => setShowUnavailabilityForm(robin.id)}
-                    className="w-full"
-                  >
-                    <AlertTriangle className="h-4 w-4 mr-2" />
-                    Mark Unavailable
-                  </Button>
-                )}
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  {!robin.registration_completed && profilePermissions[robin.id] && (
+                    <Button 
+                      size="sm" 
+                      onClick={() => setShowProfileDialog(robin.id)}
+                      className="w-full bg-orange-600 hover:bg-orange-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Complete Registration
+                    </Button>
+                  )}
 
-                {showDriveForm === robin.id ? (
-                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
-                    <Label>Record Drive</Label>
-                    <Select value={driveFormData.location && driveFormData.location !== '' ? driveFormData.location : 'none'} onValueChange={(value) => setDriveFormData({...driveFormData, location: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select drive location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Select drive location</SelectItem>
-                        {locations.map((location) => (
-                          <SelectItem key={location} value={location && location !== '' ? location : 'none'}>
-                            {location && location !== '' ? location : 'Unknown'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    <Select value={driveFormData.commute_method && driveFormData.commute_method !== '' ? driveFormData.commute_method : 'none'} onValueChange={(value) => setDriveFormData({...driveFormData, commute_method: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="How did you arrive?" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">How did you arrive?</SelectItem>
-                        {commuteOptions.map((option) => (
-                          <SelectItem key={option} value={option && option !== '' ? option : 'none'}>
-                            {option && option !== '' ? option : 'Unknown'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    <Input
-                      placeholder="What are you contributing? (e.g., helping with distribution)"
-                      value={driveFormData.contribution_message}
-                      onChange={(e) => setDriveFormData({...driveFormData, contribution_message: e.target.value})}
-                    />
-                    
-                    <div className="space-y-2">
-                      <Label>Items Brought</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add item"
-                          value={currentItem}
-                          onChange={(e) => setCurrentItem(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addItem())}
-                        />
-                        <Button type="button" onClick={addItem} size="sm">
-                          Add
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {driveFormData.items_brought.map((item) => (
-                          <Badge key={item} variant="secondary" className="gap-1">
-                            {item}
-                            <button
-                              type="button"
-                              onClick={() => removeItem(item)}
-                              className="ml-1 hover:text-red-600"
-                            >
-                              <XCircle className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleDriveRecord(robin.id)}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        Record Drive
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={resetDriveForm}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
+                  {profilePermissions[robin.id] ? (
                     <Button 
                       size="sm" 
                       onClick={() => {
-                        // Check if this is potentially a first drive
-                        if ((robin.drive_count || 0) === 0) {
-                          setShowFirstDriveDialog(robin.id);
-                        } else {
-                          setShowDriveForm(robin.id);
-                        }
+                        setEditingRobin(robin);
+                        setFormData({
+                          name: robin.name,
+                          photo_url: robin.photo_url,
+                          assigned_location: robin.assigned_location,
+                          home_location: robin.home_location || '',
+                          assigned_date: robin.assigned_date,
+                          email: robin.email || '',
+                          phone: robin.phone || '',
+                          emergency_contact: robin.emergency_contact || '',
+                          designation: robin.designation || '',
+                          customDesignation: robin.customDesignation || '',
+                          availability_preferences: robin.availability_preferences || ''
+                        });
+                        setShowForm(true);
                       }}
                       className="w-full bg-blue-600 hover:bg-blue-700"
                     >
-                      <Car className="h-4 w-4 mr-2" />
-                      Record Drive
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
                     </Button>
-                    
-                    {(robin.drive_count || 0) === 0 && (
+                  ) : (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setShowProfileDialog(robin.id)}
+                      className="w-full"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Profile
+                    </Button>
+                  )}
+
+                  {/* Location Update Form */}
+                  {showLocationEdit === robin.id && (
+                    <div className="space-y-3 p-3 bg-blue-50 rounded-lg mb-4">
+                      <Label>Update Assigned Location</Label>
+                      <Select value={newLocation && newLocation !== '' ? newLocation : 'none'} onValueChange={setNewLocation}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select new location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Select new location</SelectItem>
+                          {locations.map((location) => (
+                            <SelectItem key={location} value={location && location !== '' ? location : 'none'}>
+                              {location && location !== '' ? location : 'Unknown'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={async () => {
+                            const { error } = await updateRobinLocation(robin.id, newLocation);
+                            if (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to update location.",
+                                variant: "destructive"
+                              });
+                            } else {
+                              toast({
+                                title: "Location Updated",
+                                description: `${robin.name}'s location updated to ${newLocation}`,
+                              });
+                              setShowLocationEdit(null);
+                              setNewLocation('');
+                            }
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Update
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => setShowLocationEdit(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Unavailability Form */}
+                  {isAssignedToday && (
+                    showUnavailabilityForm === robin.id ? (
+                      <div className="space-y-3 p-3 bg-orange-50 rounded-lg mb-4">
+                        <Label>Mark Unavailable</Label>
+                        <Input
+                          type="date"
+                          value={todayStr}
+                          disabled
+                        />
+                        <Input
+                          placeholder="Reason (optional)"
+                          value={unavailabilityData.reason}
+                          onChange={(e) => setUnavailabilityData({
+                            ...unavailabilityData,
+                            reason: e.target.value
+                          })}
+                        />
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={async () => {
+                              const { error } = await addRobinUnavailability(
+                                robin.id, 
+                                todayStr, 
+                                unavailabilityData.reason
+                              );
+                              if (error) {
+                                toast({
+                                  title: "Error",
+                                  description: "Failed to mark unavailable.",
+                                  variant: "destructive"
+                                });
+                              } else {
+                                toast({
+                                  title: "Unavailable Marked",
+                                  description: `${robin.name} marked as unavailable for ${todayStr}`,
+                                });
+                                setShowUnavailabilityForm(null);
+                                setUnavailabilityData({ date: '', reason: '' });
+                              }
+                            }}
+                            className="bg-orange-600 hover:bg-orange-700"
+                          >
+                            Mark Unavailable
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => setShowUnavailabilityForm(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
                       <Button 
-                        size="sm"
+                        size="sm" 
                         variant="outline"
-                        onClick={() => setShowFirstDriveDialog(robin.id)}
+                        onClick={() => setShowUnavailabilityForm(robin.id)}
                         className="w-full"
                       >
-                        <Star className="h-4 w-4 mr-2" />
-                        Setup Drive History
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Mark Unavailable
                       </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                    )
+                  )}
+
+                  {showDriveForm === robin.id ? (
+                    <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                      <Label>Record Drive</Label>
+                      <Select value={driveFormData.location && driveFormData.location !== '' ? driveFormData.location : 'none'} onValueChange={(value) => setDriveFormData({...driveFormData, location: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select drive location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Select drive location</SelectItem>
+                          {locations.map((location) => (
+                            <SelectItem key={location} value={location && location !== '' ? location : 'none'}>
+                              {location && location !== '' ? location : 'Unknown'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Select value={driveFormData.commute_method && driveFormData.commute_method !== '' ? driveFormData.commute_method : 'none'} onValueChange={(value) => setDriveFormData({...driveFormData, commute_method: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="How did you arrive?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">How did you arrive?</SelectItem>
+                          {commuteOptions.map((option) => (
+                            <SelectItem key={option} value={option && option !== '' ? option : 'none'}>
+                              {option && option !== '' ? option : 'Unknown'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Input
+                        placeholder="What are you contributing? (e.g., helping with distribution)"
+                        value={driveFormData.contribution_message}
+                        onChange={(e) => setDriveFormData({...driveFormData, contribution_message: e.target.value})}
+                      />
+                      
+                      <div className="space-y-2">
+                        <Label>Items Brought</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Add item"
+                            value={currentItem}
+                            onChange={(e) => setCurrentItem(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addItem())}
+                          />
+                          <Button type="button" onClick={addItem} size="sm">
+                            Add
+                          </Button>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {driveFormData.items_brought.map((item) => (
+                            <Badge key={item} variant="secondary" className="gap-1">
+                              {item}
+                              <button
+                                type="button"
+                                onClick={() => removeItem(item)}
+                                className="ml-1 hover:text-red-600"
+                              >
+                                <XCircle className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleDriveRecord(robin.id)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Record Drive
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={resetDriveForm}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Button 
+                        size="sm" 
+                        onClick={() => {
+                          // Check if this is potentially a first drive
+                          if ((robin.drive_count || 0) === 0) {
+                            setShowFirstDriveDialog(robin.id);
+                          } else {
+                            setShowDriveForm(robin.id);
+                          }
+                        }}
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Car className="h-4 w-4 mr-2" />
+                        Record Drive
+                      </Button>
+                      
+                      {(robin.drive_count || 0) === 0 && (
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowFirstDriveDialog(robin.id)}
+                          className="w-full"
+                        >
+                          <Star className="h-4 w-4 mr-2" />
+                          Setup Drive History
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Profile Dialog */}
@@ -1113,39 +1074,48 @@ const EnhancedRobinManagement = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Skills</Label>
-              <div className="flex gap-2 flex-wrap">
-                {formData.skills.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="gap-1">
-                    {skill}
-                    <button
-                      type="button"
-                      onClick={() => removeSkill(skill)}
-                      className="ml-1 hover:text-red-600"
-                    >
-                      <XCircle className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <Select value={currentSkill && currentSkill !== '' ? currentSkill : 'none'} onValueChange={setCurrentSkill}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Add skill" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {skillOptions.map((skill) => (
-                      <SelectItem key={skill} value={skill && skill !== '' ? skill : 'none'}>
-                        {skill && skill !== '' ? skill : 'Unknown'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button type="button" onClick={addSkill} size="sm">
-                  Add
-                </Button>
-              </div>
+              <Label>Designation</Label>
+              <Select value={formData.designation || 'none'} onValueChange={value => setFormData({ ...formData, designation: value })}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Select designation" />
+                </SelectTrigger>
+                <SelectContent>
+                  {designationOptions.map(option => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {formData.designation === 'Custom' && (
+                <Input
+                  placeholder="Enter custom designation"
+                  value={formData.customDesignation || ''}
+                  onChange={e => setFormData({ ...formData, customDesignation: e.target.value })}
+                />
+              )}
             </div>
+            {showProfileDialog && (
+              <div className="space-y-2 pt-4">
+                <Label>Drive Participation History</Label>
+                {robinDrives.filter(drive => drive.robin_id === showProfileDialog).length === 0 ? (
+                  <p className="text-gray-500">No drives recorded yet.</p>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {robinDrives.filter(drive => drive.robin_id === showProfileDialog).map((drive, idx) => (
+                      <div key={drive.id || idx} className="p-2 border rounded bg-gray-50">
+                        <div className="flex flex-wrap gap-2 text-sm">
+                          <span><b>Date:</b> {drive.date ? new Date(drive.date).toLocaleDateString() : 'N/A'}</span>
+                          <span><b>Location:</b> {drive.location || 'N/A'}</span>
+                          <span><b>Commute:</b> {drive.commute_method || 'N/A'}</span>
+                        </div>
+                        {drive.contribution_message && (
+                          <div className="text-xs text-gray-700 mt-1"><b>Contribution:</b> {drive.contribution_message}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex gap-2 pt-4">
               <Button 
                 onClick={() => showProfileDialog && handleCompleteRegistration(showProfileDialog)}

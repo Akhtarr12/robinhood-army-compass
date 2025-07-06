@@ -49,7 +49,11 @@ const EnhancedDriveManagement = () => {
     updateDrive,
     getTodaysAssignedRobins,
     uploadPhoto,
-    loading
+    loading,
+    fetchRobins,
+    fetchChildren,
+    fetchDrives,
+    fetchAttendance
   } = useSupabaseData();
 
   const [showForm, setShowForm] = useState(false);
@@ -140,6 +144,10 @@ const EnhancedDriveManagement = () => {
         description: `${formData.name} has been successfully created.`,
       });
       resetForm();
+      await fetchRobins();
+      await fetchChildren();
+      await fetchDrives();
+      await fetchAttendance();
     }
   };
 
