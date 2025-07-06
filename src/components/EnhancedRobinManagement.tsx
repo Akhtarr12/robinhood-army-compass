@@ -441,8 +441,8 @@ const EnhancedRobinManagement = () => {
                 <SelectContent>
                   <SelectItem value="">All locations</SelectItem>
                   {locations.map((location) => (
-                    <SelectItem key={location} value={location}>
-                      {location}
+                    <SelectItem key={location} value={location || 'unknown'}>
+                      {location || 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -540,8 +540,8 @@ const EnhancedRobinManagement = () => {
                   <SelectContent>
                     <SelectItem value="">Select assigned location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                      <SelectItem key={location} value={location || 'unknown'}>
+                        {location || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -557,8 +557,8 @@ const EnhancedRobinManagement = () => {
                   <SelectContent>
                     <SelectItem value="">Select home location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                      <SelectItem key={location} value={location || 'unknown'}>
+                        {location || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -636,14 +636,14 @@ const EnhancedRobinManagement = () => {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <Select value={currentSkill} onValueChange={setCurrentSkill}>
+                  <Select value={currentSkill || ''} onValueChange={setCurrentSkill}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Add skill" />
                     </SelectTrigger>
                     <SelectContent>
                       {skillOptions.map((skill) => (
-                        <SelectItem key={skill} value={skill}>
-                          {skill}
+                        <SelectItem key={skill} value={skill || 'unknown'}>
+                          {skill || 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -824,14 +824,15 @@ const EnhancedRobinManagement = () => {
                 {showLocationEdit === robin.id && (
                   <div className="space-y-3 p-3 bg-blue-50 rounded-lg mb-4">
                     <Label>Update Assigned Location</Label>
-                    <Select value={newLocation} onValueChange={setNewLocation}>
+                    <Select value={newLocation || ''} onValueChange={setNewLocation}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select new location" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="">Select new location</SelectItem>
                         {locations.map((location) => (
-                          <SelectItem key={location} value={location}>
-                            {location}
+                          <SelectItem key={location} value={location || 'unknown'}>
+                            {location || 'Unknown'}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -943,27 +944,29 @@ const EnhancedRobinManagement = () => {
                 {showDriveForm === robin.id ? (
                   <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
                     <Label>Record Drive</Label>
-                    <Select value={driveFormData.location} onValueChange={(value) => setDriveFormData({...driveFormData, location: value})}>
+                    <Select value={driveFormData.location || ''} onValueChange={(value) => setDriveFormData({...driveFormData, location: value})}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select drive location" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="">Select drive location</SelectItem>
                         {locations.map((location) => (
-                          <SelectItem key={location} value={location}>
-                            {location}
+                          <SelectItem key={location} value={location || 'unknown'}>
+                            {location || 'Unknown'}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     
-                    <Select value={driveFormData.commute_method} onValueChange={(value) => setDriveFormData({...driveFormData, commute_method: value})}>
+                    <Select value={driveFormData.commute_method || ''} onValueChange={(value) => setDriveFormData({...driveFormData, commute_method: value})}>
                       <SelectTrigger>
                         <SelectValue placeholder="How did you arrive?" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="">How did you arrive?</SelectItem>
                         {commuteOptions.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
+                          <SelectItem key={option} value={option || 'unknown'}>
+                            {option || 'Unknown'}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -1126,14 +1129,14 @@ const EnhancedRobinManagement = () => {
                 ))}
               </div>
               <div className="flex gap-2">
-                <Select value={currentSkill} onValueChange={setCurrentSkill}>
+                <Select value={currentSkill || ''} onValueChange={setCurrentSkill}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Add skill" />
                   </SelectTrigger>
                   <SelectContent>
                     {skillOptions.map((skill) => (
-                      <SelectItem key={skill} value={skill}>
-                        {skill}
+                      <SelectItem key={skill} value={skill || 'unknown'}>
+                        {skill || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
