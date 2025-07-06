@@ -125,6 +125,8 @@ const EnhancedRobinManagement = () => {
   const [newLocation, setNewLocation] = useState('');
   const [currentItem, setCurrentItem] = useState('');
 
+  const [unavailabilityLoading, setUnavailabilityLoading] = useState(false);
+
   // Enhanced search functionality
   const filteredRobins = useMemo(() => {
     return robins.filter(robin => {
@@ -855,11 +857,13 @@ const EnhancedRobinManagement = () => {
                           <Button 
                             size="sm" 
                             onClick={async () => {
+                              setUnavailabilityLoading(true);
                               const { error } = await addRobinUnavailability(
                                 robin.id, 
                                 todayStr, 
                                 unavailabilityData.reason
                               );
+                              setUnavailabilityLoading(false);
                               if (error) {
                                 toast({
                                   title: "Error",
@@ -873,11 +877,15 @@ const EnhancedRobinManagement = () => {
                                 });
                                 setShowUnavailabilityForm(null);
                                 setUnavailabilityData({ date: '', reason: '' });
+                                // Re-fetch today's assigned Robins
+                                const { data } = await getTodaysAssignedRobins();
+                                if (data) setTodaysAssignedRobins(data);
                               }
                             }}
                             className="bg-orange-600 hover:bg-orange-700"
+                            disabled={unavailabilityLoading}
                           >
-                            Mark Unavailable
+                            {unavailabilityLoading ? 'Marking...' : 'Mark Unavailable'}
                           </Button>
                           <Button 
                             size="sm" 
