@@ -262,15 +262,15 @@ const EnhancedRobinsSection = () => {
             </div>
             <div className="space-y-2">
               <Label>Filter by Location</Label>
-              <Select value={searchLocation || ''} onValueChange={setSearchLocation}>
+              <Select value={searchLocation && searchLocation !== '' ? searchLocation : 'none'} onValueChange={setSearchLocation}>
                 <SelectTrigger>
                   <SelectValue placeholder="All locations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All locations</SelectItem>
+                  <SelectItem value="none">All locations</SelectItem>
                   {locations.map((location) => (
-                    <SelectItem key={location} value={location || 'unknown'}>
-                      {location || 'Unknown'}
+                    <SelectItem key={location} value={location && location !== '' ? location : 'placeholder'}>
+                      {location && location !== '' ? location : 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -383,7 +383,7 @@ const EnhancedRobinsSection = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500">{robin.home_location || 'Location not set'}</p>
+                    <p className="text-sm text-gray-500">{robin.home_location && robin.home_location !== '' ? robin.home_location : 'Location not set'}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -431,15 +431,15 @@ const EnhancedRobinsSection = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="assigned_location">Assigned Location *</Label>
-                <Select value={formData.assigned_location || ''} onValueChange={(value) => setFormData({ ...formData, assigned_location: value })}>
+                <Select value={formData.assigned_location && formData.assigned_location !== '' ? formData.assigned_location : 'none'} onValueChange={(value) => setFormData({ ...formData, assigned_location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select assigned location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Select assigned location</SelectItem>
+                    <SelectItem value="none">Select assigned location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location || 'unknown'}>
-                        {location || 'Unknown'}
+                      <SelectItem key={location} value={location && location !== '' ? location : 'placeholder'}>
+                        {location && location !== '' ? location : 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -448,15 +448,15 @@ const EnhancedRobinsSection = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="home_location">Home Location</Label>
-                <Select value={formData.home_location || ''} onValueChange={(value) => setFormData({ ...formData, home_location: value })}>
+                <Select value={formData.home_location && formData.home_location !== '' ? formData.home_location : 'none'} onValueChange={(value) => setFormData({ ...formData, home_location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select home location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Select home location</SelectItem>
+                    <SelectItem value="none">Select home location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location || 'unknown'}>
-                        {location || 'Unknown'}
+                      <SelectItem key={location} value={location && location !== '' ? location : 'placeholder'}>
+                        {location && location !== '' ? location : 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -550,7 +550,7 @@ const EnhancedRobinsSection = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center text-gray-600">
                     <MapPin className="h-4 w-4 mr-2 text-green-600" />
-                    <span className="font-medium">Assigned: {robin.assigned_location}</span>
+                    <span className="font-medium">Assigned: {robin.assigned_location && robin.assigned_location !== '' ? robin.assigned_location : 'Location not set'}</span>
                   </div>
                   <Button 
                     size="sm" 
@@ -564,7 +564,7 @@ const EnhancedRobinsSection = () => {
                 {robin.home_location && (
                   <div className="flex items-center text-gray-600">
                     <MapPin className="h-4 w-4 mr-2 text-purple-600" />
-                    <span>Home: {robin.home_location}</span>
+                    <span>Home: {robin.home_location && robin.home_location !== '' ? robin.home_location : 'Location not set'}</span>
                   </div>
                 )}
                 <div className="flex items-center text-gray-600">
@@ -594,15 +594,15 @@ const EnhancedRobinsSection = () => {
               {showLocationEdit === robin.id && (
                 <div className="space-y-3 p-3 bg-blue-50 rounded-lg mb-4">
                   <Label>Update Assigned Location</Label>
-                  <Select value={newLocation || ''} onValueChange={setNewLocation}>
+                  <Select value={newLocation && newLocation !== '' ? newLocation : 'none'} onValueChange={setNewLocation}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select new location" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Select new location</SelectItem>
+                      <SelectItem value="none">Select new location</SelectItem>
                       {locations.map((location) => (
-                        <SelectItem key={location} value={location || 'unknown'}>
-                          {location || 'Unknown'}
+                        <SelectItem key={location} value={location && location !== '' ? location : 'placeholder'}>
+                          {location && location !== '' ? location : 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -710,29 +710,29 @@ const EnhancedRobinsSection = () => {
               {showDriveForm === robin.id ? (
                 <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
                   <Label>Record Drive</Label>
-                  <Select value={driveFormData.location || ''} onValueChange={(value) => setDriveFormData({...driveFormData, location: value})}>
+                  <Select value={driveFormData.location && driveFormData.location !== '' ? driveFormData.location : 'none'} onValueChange={(value) => setDriveFormData({...driveFormData, location: value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select drive location" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Select drive location</SelectItem>
+                      <SelectItem value="none">Select drive location</SelectItem>
                       {locations.map((location) => (
-                        <SelectItem key={location} value={location || 'unknown'}>
-                          {location || 'Unknown'}
+                        <SelectItem key={location} value={location && location !== '' ? location : 'placeholder'}>
+                          {location && location !== '' ? location : 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   
-                  <Select value={driveFormData.commute_method || ''} onValueChange={(value) => setDriveFormData({...driveFormData, commute_method: value})}>
+                  <Select value={driveFormData.commute_method && driveFormData.commute_method !== '' ? driveFormData.commute_method : 'none'} onValueChange={(value) => setDriveFormData({...driveFormData, commute_method: value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="How did you arrive?" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">How did you arrive?</SelectItem>
+                      <SelectItem value="none">How did you arrive?</SelectItem>
                       {commuteOptions.map((option) => (
-                        <SelectItem key={option} value={option || 'unknown'}>
-                          {option || 'Unknown'}
+                        <SelectItem key={option} value={option && option !== '' ? option : 'placeholder'}>
+                          {option && option !== '' ? option : 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>

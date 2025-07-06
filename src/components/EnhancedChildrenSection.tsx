@@ -220,15 +220,15 @@ const EnhancedChildrenSection = () => {
             </div>
             <div className="space-y-2">
               <Label>Filter by Location</Label>
-              <Select value={searchLocation || ''} onValueChange={setSearchLocation}>
+              <Select value={searchLocation && searchLocation !== '' ? searchLocation : 'none'} onValueChange={setSearchLocation}>
                 <SelectTrigger>
                   <SelectValue placeholder="All locations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All locations</SelectItem>
+                  <SelectItem value="none">All locations</SelectItem>
                   {locations.map((location) => (
-                    <SelectItem key={location} value={location || 'unknown'}>
-                      {location || 'Unknown'}
+                    <SelectItem key={location} value={location && location !== '' ? location : 'none'}>
+                      {location && location !== '' ? location : 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -319,7 +319,7 @@ const EnhancedChildrenSection = () => {
                   )}
                   <div>
                     <p className="font-medium">{child.name}</p>
-                    <p className="text-sm text-gray-500">{child.location || 'No location set'}</p>
+                    <p className="text-sm text-gray-500">{child.location && child.location !== '' ? child.location : 'No location set'}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -410,15 +410,15 @@ const EnhancedChildrenSection = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="location">Usual Drive Location</Label>
-                <Select value={formData.location || ''} onValueChange={(value) => setFormData({ ...formData, location: value })}>
+                <Select value={formData.location && formData.location !== '' ? formData.location : 'none'} onValueChange={(value) => setFormData({ ...formData, location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select usual location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Select usual location</SelectItem>
+                    <SelectItem value="none">Select usual location</SelectItem>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location || 'unknown'}>
-                        {location || 'Unknown'}
+                      <SelectItem key={location} value={location && location !== '' ? location : 'none'}>
+                        {location && location !== '' ? location : 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -567,14 +567,15 @@ const EnhancedChildrenSection = () => {
               {showAttendance === child.id ? (
                 <div className="space-y-3 p-3 bg-green-50 rounded-lg">
                   <Label>Mark Attendance</Label>
-                  <Select value={attendanceLocation} onValueChange={setAttendanceLocation}>
+                  <Select value={attendanceLocation && attendanceLocation !== '' ? attendanceLocation : 'none'} onValueChange={setAttendanceLocation}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">Select location</SelectItem>
                       {locations.map((location) => (
-                        <SelectItem key={location} value={location || 'unknown'}>
-                          {location || 'Unknown'}
+                        <SelectItem key={location} value={location && location !== '' ? location : 'none'}>
+                          {location && location !== '' ? location : 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>
