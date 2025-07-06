@@ -357,8 +357,8 @@ const DriveManagementSection = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                      <SelectItem key={location || 'unknown'} value={location || 'unknown'}>
+                        {location || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>

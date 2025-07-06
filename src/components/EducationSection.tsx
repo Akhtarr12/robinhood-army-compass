@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -179,8 +178,8 @@ const EducationSection = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({length: 18}, (_, i) => i + 3).map((age) => (
-                    <SelectItem key={age} value={age.toString()}>
-                      {age} years old
+                    <SelectItem key={age} value={age !== undefined && age !== null ? age.toString() : 'unknown'}>
+                      {age !== undefined && age !== null ? age.toString() : 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -195,8 +194,8 @@ const EducationSection = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {subjects.map((subject) => (
-                    <SelectItem key={subject} value={subject}>
-                      {subject}
+                    <SelectItem key={subject || 'unknown'} value={subject || 'unknown'}>
+                      {subject || 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -211,8 +210,8 @@ const EducationSection = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {contentTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
+                    <SelectItem key={type || 'unknown'} value={type || 'unknown'}>
+                      {type || 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -227,8 +226,8 @@ const EducationSection = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {toneOptions.map((tone) => (
-                    <SelectItem key={tone} value={tone}>
-                      {tone}
+                    <SelectItem key={tone || 'unknown'} value={tone || 'unknown'}>
+                      {tone || 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -243,8 +242,8 @@ const EducationSection = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {languageOptions.map((lang) => (
-                    <SelectItem key={lang} value={lang}>
-                      {lang}
+                    <SelectItem key={lang || 'unknown'} value={lang || 'unknown'}>
+                      {lang || 'Unknown'}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -332,8 +332,8 @@ const ChildrenSection = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                      <SelectItem key={location || 'unknown'} value={location || 'unknown'}>
+                        {location || 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -348,8 +348,8 @@ const ChildrenSection = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({length: 18}, (_, i) => i + 3).map((age) => (
-                      <SelectItem key={age} value={age.toString()}>
-                        {age} years old
+                      <SelectItem key={age} value={age !== undefined && age !== null ? age.toString() : 'unknown'}>
+                        {age !== undefined && age !== null ? age.toString() : 'Unknown'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -440,8 +440,8 @@ const ChildrenSection = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {locations.map((location) => (
-                        <SelectItem key={location} value={location}>
-                          {location}
+                        <SelectItem key={location || 'unknown'} value={location || 'unknown'}>
+                          {location || 'Unknown'}
                         </SelectItem>
                       ))}
                     </SelectContent>
