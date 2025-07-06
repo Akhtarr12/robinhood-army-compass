@@ -220,13 +220,13 @@ const EnhancedChildrenSection = () => {
             </div>
             <div className="space-y-2">
               <Label>Filter by Location</Label>
-              <Select value={searchLocation || "all"} onValueChange={(value) => setSearchLocation(value === "all" ? "" : value)}>
+              <Select value={searchLocation || ''} onValueChange={setSearchLocation}>
                 <SelectTrigger>
                   <SelectValue placeholder="All locations" />
                 </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All locations</SelectItem>
-                    {locations.map((location) => (
+                <SelectContent>
+                  <SelectItem value="">All locations</SelectItem>
+                  {locations.map((location) => (
                     <SelectItem key={location} value={location}>
                       {location}
                     </SelectItem>
@@ -410,11 +410,12 @@ const EnhancedChildrenSection = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="location">Usual Drive Location</Label>
-                <Select value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}>
+                <Select value={formData.location || ''} onValueChange={(value) => setFormData({ ...formData, location: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select usual location" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Select usual location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>
                         {location}
