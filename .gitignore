@@ -12,13 +12,22 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# Environment variables
+.env
+
+# Editor directories and filestor directories and files
 .vscode/*
-!.vscode/extensions.json
+!.vscode/extensions.jsonode/extensions.json
 .idea
 .DS_Store
 *.suo
-*.ntvs*
-*.njsproj
-*.sln
+*.ntvs*s*
+*.njsproj*.njsproj
+
+
+
+*.sw?*.sln*.sln
 *.sw?
+
+NEXT_PUBLIC_SUPABASE_URL=https://nyqlxxhdrkpsizpumpyy.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55cWx4eGhkcmtwc2l6cHVtcHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzOTA0NDIsImV4cCI6MjA2Njk2NjQ0Mn0.iLI3XhfT2gGaTMYbUX9Ph-GxGtCUzd6ikVHR80BigvA
